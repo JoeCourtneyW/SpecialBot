@@ -97,7 +97,6 @@
 				<configuration>
 					<source>1.8</source> <!-- JDK Version -->
 					<target>1.8</target>
-					<finalName>SpecialBot-${project.version}-shaded</finalName> <!-- Changes the final name of the actual .jar file -->
 				</configuration>
 				<executions> <!-- Spooky copy-pasta in order to let this run when I run 'mvn package' -->
 					<execution>
