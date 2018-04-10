@@ -13,7 +13,14 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
+	<profiles>
+		<profile>
+			<id>droplet_output_dir</id>
+			<build>
+				<directory>SpecialBot/build</directory>
+			</build>
+		</profile>
+	</profiles>
 	<repositories>
 		<repository> <!-- This repo fixes issues with transitive dependencies -->
 			<id>jcenter</id>
@@ -64,6 +71,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
 				<configuration>
+					<finalName>SpecialBot-clean</finalName>
 					<archive>
 						<manifestFile>src/main/resources/META_INF/MANIFEST.MF</manifestFile>
 					</archive>
@@ -85,6 +93,7 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+					<finalName>SpecialBot-shaded</finalName>
 				</configuration>
 				<executions>
 					<execution>
