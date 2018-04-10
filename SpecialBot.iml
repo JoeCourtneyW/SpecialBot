@@ -10,10 +10,10 @@
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/modules" />
       <excludeFolder url="file://$MODULE_DIR$/nsfw" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main/java/modules/_audio_old" />
       <excludeFolder url="file://$MODULE_DIR$/src/main/java/modules/_command_old" />
       <excludeFolder url="file://$MODULE_DIR$/src/main/java/modules/_config_old" />
       <excludeFolder url="file://$MODULE_DIR$/src/main/java/modules/_database_old" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/resources/_audio_old" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
