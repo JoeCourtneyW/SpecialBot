@@ -13,7 +13,7 @@ public class Steam extends SpecialModule{
     }
 
     public boolean enable() {
-        registerCommands(new CommandWishlist(bot));
+        registerCommands(new CommandSearch(bot));
         return true;
     }
 

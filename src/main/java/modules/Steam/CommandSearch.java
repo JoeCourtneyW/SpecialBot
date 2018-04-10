@@ -14,30 +14,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class CommandWishlist extends CommandExecutor {
+public class CommandSearch extends CommandExecutor {
     private static SpecialBot bot;
 
-    public CommandWishlist(SpecialBot bot) {
+    public CommandSearch(SpecialBot bot) {
         super(bot);
-        CommandWishlist.bot = bot;
+        CommandSearch.bot = bot;
     }
 
-    @Command(label = "wishlist")
-    public static void onWishlist(IMessage message) {
+    @Command(label = "search")
+    public static void onSearch(IMessage message) {
         String[] args = message.getContent().split(" ");
         IChannel channel = message.getChannel();
-        InputStream stream;
+
+        String searchTerm = "";
         String appid = "378610"; //TODO: Reformat to make the try statements prettier, also add search functionality instead of simply the appid
         if(args.length >= 2){
-            appid = args[1];
+            searchTerm = "";
+            //TODO: Loop through all the args to get a string of search phrase
         }
-        try {
-            URL url = new URL("http://store.steampowered.com/api/appdetails/?appids=" + appid + "&cc=us&l=en");
-            stream = url.openStream();
-        } catch (IOException e) {
-            LoggerUtil.CRITICAL("Shitty url kid");
-            return;
-        }
+        InputStream stream = getStreamFromUrl("http://store.steampowered.com/api/appdetails/?appids=" + appid + "&cc=us&l=en");
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(stream).get(appid);
@@ -59,6 +55,14 @@ public class CommandWishlist extends CommandExecutor {
             bot.sendEmbed(embed.build(), channel);
         } catch (IOException e) {
             LoggerUtil.CRITICAL("PARSING ERROR");
+        }
+    }
+    private static InputStream getStreamFromUrl(String url){
+        try {
+            return new URL(url).openStream();
+        } catch (IOException e) {
+            LoggerUtil.CRITICAL("Unable to open stream to url: " + url);
+            return null;
         }
     }
 }
