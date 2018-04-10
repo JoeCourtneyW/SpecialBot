@@ -83,7 +83,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
 				<configuration>
-					<finalName>SpecialBot-clean</finalName>  <!-- Changes the final name of the actual .jar file -->
+					<finalName>SpecialBot-${project.version}-clean</finalName>  <!-- Changes the final name of the actual .jar file -->
 					<archive>
 						<manifestFile>src/main/resources/META_INF/MANIFEST.MF</manifestFile> <!-- Manifest file path that contains the main class path -->
 					</archive>
@@ -97,7 +97,7 @@
 				<configuration>
 					<source>1.8</source> <!-- JDK Version -->
 					<target>1.8</target>
-					<finalName>SpecialBot-${version}-shaded</finalName> <!-- Changes the final name of the actual .jar file -->
+					<finalName>SpecialBot-${project.version}-shaded</finalName> <!-- Changes the final name of the actual .jar file -->
 				</configuration>
 				<executions> <!-- Spooky copy-pasta in order to let this run when I run 'mvn package' -->
 					<execution>
