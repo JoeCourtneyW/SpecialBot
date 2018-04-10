@@ -18,7 +18,7 @@
 		<profile>
 			<id>droplet_output_dir</id>
 			<build>
-				<directory>~/SpecialBot-build</directory>
+				<directory>/home/specialbot/SpecialBot-build</directory>
 			</build>
 		</profile>
 	</profiles>
