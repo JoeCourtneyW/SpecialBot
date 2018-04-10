@@ -83,7 +83,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
 				<configuration>
-					<finalName>SpecialBot-${project.version}-clean</finalName>  <!-- Changes the final name of the actual .jar file -->
+					<finalName>SpecialBot</finalName>  <!-- Changes the final name of the actual .jar file (Makes it constant so script knows -->
 					<archive>
 						<manifestFile>src/main/resources/META_INF/MANIFEST.MF</manifestFile> <!-- Manifest file path that contains the main class path -->
 					</archive>
