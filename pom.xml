@@ -7,14 +7,14 @@
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>SpecialBot</name>
+	<name>SpecialBot</name> <!-- Actual project name -->
 	<url>http://maven.apache.org</url>
 
-	<properties>
+	<properties> <!-- Sets the char set for the project -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<profiles>
+	<profiles> <!-- Creates alternate build directory, specifically for the droplet host -->
 		<profile>
 			<id>droplet_output_dir</id>
 			<build>
@@ -28,13 +28,13 @@
 			<id>jcenter</id>
 			<url>http://jcenter.bintray.com</url>
 		</repository>
-		<repository>
+		<repository> <!-- This repo is for Discord4J -->
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
 
-	<dependencies>
+	<dependencies> <!-- All the dependencies required for the project to run -->
 		<dependency>
 			<groupId>com.github.austinv11</groupId>
 			<artifactId>Discord4j</artifactId>
@@ -66,38 +66,40 @@
 			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
-			<plugin>
+			<plugin>  <!-- Plugin used to compile java files into class files -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.7.0</version>
 				<configuration>
-					<source>1.8</source>
+					<source>1.8</source> <!-- JDK Version -->
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<plugin>
+			<plugin> <!-- Plugin used to jar class files into a .jar file -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
 				<configuration>
-					<finalName>SpecialBot-clean</finalName>
+					<finalName>SpecialBot-clean</finalName>  <!-- Changes the final name of the actual .jar file -->
 					<archive>
-						<manifestFile>src/main/resources/META_INF/MANIFEST.MF</manifestFile>
+						<manifestFile>src/main/resources/META_INF/MANIFEST.MF</manifestFile> <!-- Manifest file path that contains the main class path -->
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin>
+
+			<plugin> <!-- Plugin used to shade dependencies into the .jar file with the source code -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.1.1</version>
 				<configuration>
-					<source>1.8</source>
+					<source>1.8</source> <!-- JDK Version -->
 					<target>1.8</target>
-					<finalName>SpecialBot-${version}-shaded</finalName>
+					<finalName>SpecialBot-${version}-shaded</finalName> <!-- Changes the final name of the actual .jar file -->
 				</configuration>
-				<executions>
+				<executions> <!-- Spooky copy-pasta in order to let this run when I run 'mvn package' -->
 					<execution>
 						<phase>package</phase>
 						<goals>
