@@ -93,8 +93,8 @@ public class AudioManager extends CommandExecutor {
                     join(im.getChannel(), im.getAuthor()));
         }
         if (isURL(args[0])) {
-            bot.tryDiscordFunction(() ->
-                    queueYoutube(im.getChannel(), args[0], ""));
+                bot.tryDiscordFunction(() ->
+                        queueYoutube(im.getChannel(), args[0], Search.getTitle(args[0])));
 
         } else {
             StringBuilder sb = new StringBuilder();
@@ -311,7 +311,7 @@ public class AudioManager extends CommandExecutor {
 
     }
 
-    private static String getYoutubeIdFromUrl(String url) {
+    public static String getYoutubeIdFromUrl(String url) {
         String id;
         if (url.contains("youtu.be")) {
             id = url.split("/")[1];

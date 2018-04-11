@@ -25,8 +25,7 @@ public class Search {
         // Set your developer key from the {{ Google Cloud Console }} for
         // non-authenticated requests. See:
         // {{ https://cloud.google.com/console }}
-        String apiKey = API_KEY; 
-        search.setKey(apiKey);
+        search.setKey(API_KEY);
         search.setQ(query);
 
         // Restrict the search results to only include videos. See:
@@ -45,6 +44,16 @@ public class Search {
         data[0] = searchResultList.get(0).getId().getVideoId();
         data[1] = searchResultList.get(0).getSnippet().getTitle();
         return data;
-        
+    }
+    public static String getTitle(String url){
+        try {
+            YouTube.Videos.List list = Music.youtube.videos().list("snippet");
+            list.setId(AudioManager.getYoutubeIdFromUrl(url));
+
+            return list.execute().getItems().get(0).getSnippet().getTitle();
+        }catch(IOException e){
+            e.printStackTrace();
+            return "";
+        }
     }
 }
