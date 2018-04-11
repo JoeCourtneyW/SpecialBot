@@ -328,7 +328,7 @@ public class AudioManager extends CommandExecutor {
 
     private static File downloadYoutubeURL(final String url, String title, IGuild g) {
         final String id = getYoutubeIdFromUrl(url);
-        String path = music_dir.getPath();
+        String path = music_dir.getPath() + File.separator;
 
         path += id + ".mp3";
         if (new File(path).exists()) {
