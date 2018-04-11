@@ -20,7 +20,6 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import com.sun.javafx.runtime.SystemProperties;
 import main.Commands.Command;
 import main.Commands.CommandExecutor;
 import main.Main;
