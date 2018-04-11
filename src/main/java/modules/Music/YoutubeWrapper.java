@@ -2,6 +2,9 @@ package modules.Music;
 
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Period;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import com.google.api.services.youtube.YouTube;
@@ -9,7 +12,7 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import main.Main;
 
-public class Search {
+public class YoutubeWrapper {
 
     /**
      * Define a global variable that identifies the developer's API key.
@@ -19,9 +22,9 @@ public class Search {
     private static final long NUMBER_OF_VIDEOS_RETURNED = 1;
 
     
-    public static String[] getVideoID(String query) throws IOException{
+    public static String[] search(String query) throws IOException{
     	// Define the API request for retrieving search results.
-        YouTube.Search.List search = Music.youtube.search().list("id,snippet");
+        YouTube.Search.List search = Music.youtube.search().list("id,snippet,contentDetails");
 
         search.setQ(query);
 
@@ -47,13 +50,24 @@ public class Search {
     public static String getTitle(String url){
         try {
             YouTube.Videos.List list = Music.youtube.videos().list("snippet");
-            list.setId(AudioManager.getYoutubeIdFromUrl(url));
+            String id = AudioManager.getYoutubeIdFromUrl(url);
+            list.setId(id);
             list.setKey(API_KEY);
-
             return list.execute().getItems().get(0).getSnippet().getTitle();
         }catch(IOException e){
             e.printStackTrace();
             return "";
+        }
+    }
+    public static long getDuration(String id){
+        try {
+            YouTube.Videos.List list = Music.youtube.videos().list("contentDetails");
+            list.setId(id);
+            list.setKey(API_KEY);
+            return Duration.parse(list.execute().getItems().get(0).getContentDetails().getDuration()).toMillis();
+        }catch(IOException e){
+            e.printStackTrace();
+            return -1;
         }
     }
 }

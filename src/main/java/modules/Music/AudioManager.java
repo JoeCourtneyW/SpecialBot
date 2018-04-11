@@ -1,10 +1,7 @@
 package modules.Music;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -12,8 +9,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -94,7 +89,7 @@ public class AudioManager extends CommandExecutor {
         }
         if (isURL(args[0])) {
                 bot.tryDiscordFunction(() ->
-                        queueYoutube(im.getChannel(), args[0], Search.getTitle(args[0])));
+                        queueYoutube(im.getChannel(), args[0], YoutubeWrapper.getTitle(args[0])));
 
         } else {
             StringBuilder sb = new StringBuilder();
@@ -105,7 +100,7 @@ public class AudioManager extends CommandExecutor {
             String id;
             String title;
             try {
-                String[] data = Search.getVideoID(sb.toString());
+                String[] data = YoutubeWrapper.search(sb.toString());
                 id = data[0];
                 title = data[1];
             } catch (IOException e) {
@@ -206,6 +201,9 @@ public class AudioManager extends CommandExecutor {
 
     public static void queueYoutube(IChannel channel, String url, String title){
         bot.getAsyncExecutor().submit(()-> {
+            if(YoutubeWrapper.getDuration(getYoutubeIdFromUrl(url)) > 1000*60*10)
+                bot.sendChannelMessage("That video is too long to play! Videos must be under 10 minutes", channel);
+
             File audioFile = downloadYoutubeURL(url, title, channel.getGuild());
             if (audioFile == null) {
                 bot.sendChannelMessage("Audio file received as null from download", channel);
@@ -343,7 +341,7 @@ public class AudioManager extends CommandExecutor {
         bot.sendChannelMessage("Downloading file...", lastChannel.get(g));
         try {
             downloading = true;
-            Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, new File(musicRoot));
+            Process p = Runtime.getRuntime().exec("sudo youtube-dl -f \"[filesize>10M]\" --id --extract-audio --audio-format mp3 " + url, null, new File(musicRoot));
             LoggerUtil.DEBUG("Downloading youtube mp3 from " + url);
             p.waitFor();
             LoggerUtil.DEBUG("File downloaded");
