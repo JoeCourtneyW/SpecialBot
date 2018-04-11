@@ -26,20 +26,21 @@ public class Main {
 
     public static SpecialBot bot;
 
-    public static void main(String[] args) {
+    public static void main(String[] args){
         String credentialsFile = "credentials.json";
-        if(args.length > 0)
-             credentialsFile = args[0];
+        if (args.length > 0)
+            credentialsFile = args[0];
 
         CREDENTIALS = loadCredentials(new File(credentialsFile));
-        if(CREDENTIALS == null)
+        if (CREDENTIALS == null)
             return;
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
         Scanner control = new Scanner(System.in);
-            if(control.hasNext()) {
-                return;
-            }
+        if (control.nextLine().equalsIgnoreCase("exit")) {
+            bot.getClient().logout();
+            System.exit(0);
+        }
     }
 
     private static SpecialBot login() {
@@ -55,7 +56,6 @@ public class Main {
     }
 
 
-
     private static IDiscordClient createClient(String token) { // Returns a new instance of the Discord client
         ClientBuilder clientBuilder = new ClientBuilder();
         clientBuilder.withToken(token); // Uses the given token for the client
@@ -68,11 +68,10 @@ public class Main {
     }
 
     /**
-     *
      * @param credentialsFile the JSON file that contains the credentials
      * @return A HashMap with stirng keys, and JsonNodes for the credentials
      */
-    private static HashMap<String, JsonNode> loadCredentials(File credentialsFile){
+    private static HashMap<String, JsonNode> loadCredentials(File credentialsFile) {
         HashMap<String, JsonNode> credentials = new HashMap<>();
         try {
             byte[] jsonData = Files.readAllBytes(credentialsFile.toPath());
@@ -84,7 +83,7 @@ public class Main {
             credentials.put("REDDIT_CLIENT_ID", objectMapper.readTree(jsonData).path("REDDIT_CLIENT_ID"));
             credentials.put("REDDIT_SECRET_KEY", objectMapper.readTree(jsonData).path("REDDIT_SECRET_KEY"));
             credentials.put("GOOGLE_API_KEY", objectMapper.readTree(jsonData).path("GOOGLE_API_KEY"));
-        } catch(IOException ioe){
+        } catch (IOException ioe) {
             LoggerUtil.CRITICAL("Credentials file failed to load, cancelling startup.");
             return null;
         }

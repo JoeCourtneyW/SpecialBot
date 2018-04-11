@@ -40,10 +40,12 @@ import utils.LoggerUtil;
 public class AudioManager extends CommandExecutor {
 
     private static SpecialBot bot;
+    private static File music_dir;
 
     public AudioManager(SpecialBot bot) {
         super(bot);
         AudioManager.bot = bot;
+        music_dir = new File(Main.DIR + File.separator + "music" + File.separator);
     }
 
     //TODO Playlists, Download song only
@@ -88,8 +90,8 @@ public class AudioManager extends CommandExecutor {
                     join(im.getChannel(), im.getAuthor()));
         }
         if (isURL(args[0])) {
-                bot.tryDiscordFunction(() ->
-                        queueYoutube(im.getChannel(), args[0], YoutubeWrapper.getTitle(args[0])));
+            bot.tryDiscordFunction(() ->
+                    queueYoutube(im.getChannel(), args[0], YoutubeWrapper.getTitle(args[0])));
 
         } else {
             StringBuilder sb = new StringBuilder();
@@ -199,15 +201,16 @@ public class AudioManager extends CommandExecutor {
         }
     }
 
-    public static void queueYoutube(IChannel channel, String url, String title){
-        bot.getAsyncExecutor().submit(()-> {
-            if(YoutubeWrapper.getDuration(getYoutubeIdFromUrl(url)) > 1000*60*10)
+    public static void queueYoutube(IChannel channel, String url, String title) {
+        bot.getAsyncExecutor().submit(() -> {
+            if (YoutubeWrapper.getDuration(getYoutubeIdFromUrl(url)) > 1000 * 60 * 10) {
                 bot.sendChannelMessage("That video is too long to play! Videos must be under 10 minutes", channel);
-
+                return;
+            }
             File audioFile = downloadYoutubeURL(url, title, channel.getGuild());
             if (audioFile == null) {
                 bot.sendChannelMessage("Audio file received as null from download", channel);
-            }else if (!audioFile.exists())
+            } else if (!audioFile.exists())
                 bot.sendChannelMessage("That file doesn't exist!", channel);
             else if (!audioFile.canRead())
                 bot.sendChannelMessage("I don't have access to that file!", channel);
@@ -324,9 +327,8 @@ public class AudioManager extends CommandExecutor {
     private static boolean downloading = false;
 
     private static File downloadYoutubeURL(final String url, String title, IGuild g) {
-        final String musicRoot = Main.DIR + File.separator + "music" + File.separator;
         final String id = getYoutubeIdFromUrl(url);
-        String path = musicRoot;
+        String path = music_dir.getPath();
 
         path += id + ".mp3";
         if (new File(path).exists()) {
@@ -341,11 +343,10 @@ public class AudioManager extends CommandExecutor {
         bot.sendChannelMessage("Downloading file...", lastChannel.get(g));
         try {
             downloading = true;
-            Process p = Runtime.getRuntime().exec("sudo youtube-dl -f \"[filesize>10M]\" --id --extract-audio --audio-format mp3 " + url, null, new File(musicRoot));
+            Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, music_dir);
             LoggerUtil.DEBUG("Downloading youtube mp3 from " + url);
             p.waitFor();
             LoggerUtil.DEBUG("File downloaded");
-            //Runtime.getRuntime().exec("sudo chmod 777 " + musicRoot + File.separator + id + " ");
             downloading = false;
         } catch (IOException | InterruptedException e) {
             downloading = false;
