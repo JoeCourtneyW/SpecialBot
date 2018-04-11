@@ -39,6 +39,7 @@ import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
 import sx.blah.discord.util.audio.events.TrackQueueEvent;
 import sx.blah.discord.util.audio.events.TrackStartEvent;
+import utils.LoggerUtil;
 
 @SuppressWarnings("unused")
 public class AudioManager extends CommandExecutor {
@@ -203,24 +204,25 @@ public class AudioManager extends CommandExecutor {
         }
     }
 
-    public static void queueYoutube(IChannel channel, String url, String title) throws RateLimitException, DiscordException, MissingPermissionsException {
+    public static void queueYoutube(IChannel channel, String url, String title){
         bot.getAsyncExecutor().submit(()-> {
             File audioFile = downloadYoutubeURL(url, title, channel.getGuild());
-            if (audioFile == null)
-                return;
-            if (!audioFile.exists())
-                channel.sendMessage("That file doesn't exist!");
+            if (audioFile == null) {
+                bot.sendChannelMessage("Audio file received as null from download", channel);
+            }else if (!audioFile.exists())
+                bot.sendChannelMessage("That file doesn't exist!", channel);
             else if (!audioFile.canRead())
-                channel.sendMessage("I don't have access to that file!");
+                bot.sendChannelMessage("I don't have access to that file!", channel);
             else {
                 try {
+                    LoggerUtil.DEBUG("Adding file to queue");
                     Track t = getPlayer(channel.getGuild()).queue(audioFile);
                     setTrackTitle(t, title);
                     setTrackFile(t, audioFile);
                 } catch (IOException e) {
-                    channel.sendMessage("An IO exception occured: " + e.getMessage());
+                    bot.sendChannelMessage("An IO exception occured: " + e.getMessage(), channel);
                 } catch (UnsupportedAudioFileException e) {
-                    channel.sendMessage("That type of file is not supported!");
+                    bot.sendChannelMessage("That type of file is not supported!", channel);
                 }
             }
         });
@@ -330,6 +332,7 @@ public class AudioManager extends CommandExecutor {
 
         path += id + ".mp3";
         if (new File(path).exists()) {
+            LoggerUtil.DEBUG("File already downloaded, continuing");
             return new File(path);
         }
         if (downloading) {
@@ -341,8 +344,9 @@ public class AudioManager extends CommandExecutor {
         try {
             downloading = true;
             Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, new File(musicRoot));
-
+            LoggerUtil.DEBUG("Downloading youtube mp3 from " + url);
             p.waitFor();
+            LoggerUtil.DEBUG("File downloaded");
             //Runtime.getRuntime().exec("sudo chmod 777 " + musicRoot + File.separator + id + " ");
             downloading = false;
         } catch (IOException | InterruptedException e) {
