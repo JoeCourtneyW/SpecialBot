@@ -24,7 +24,7 @@ public class YoutubeWrapper {
     
     public static String[] search(String query) throws IOException{
     	// Define the API request for retrieving search results.
-        YouTube.Search.List search = Music.youtube.search().list("id,snippet,contentDetails");
+        YouTube.Search.List search = Music.youtube.search().list("id,snippet");
 
         search.setQ(query);
 
