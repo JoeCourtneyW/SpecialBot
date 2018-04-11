@@ -83,6 +83,7 @@ public class Main {
             credentials.put("REDDIT_PASSWORD", objectMapper.readTree(jsonData).path("REDDIT_PASSWORD"));
             credentials.put("REDDIT_CLIENT_ID", objectMapper.readTree(jsonData).path("REDDIT_CLIENT_ID"));
             credentials.put("REDDIT_SECRET_KEY", objectMapper.readTree(jsonData).path("REDDIT_SECRET_KEY"));
+            credentials.put("GOOGLE_API_KEY", objectMapper.readTree(jsonData).path("GOOGLE_API_KEY"));
         } catch(IOException ioe){
             LoggerUtil.CRITICAL("Credentials file failed to load, cancelling startup.");
             return null;
