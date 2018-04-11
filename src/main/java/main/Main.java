@@ -3,6 +3,7 @@ package main;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import modules.AutoRank.AutoRank;
+import modules.Music.Music;
 import modules.Reddit.Reddit;
 import modules.Steam.Steam;
 import modules.TempMembership.TempMembership;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Main {
     public static HashMap<String, JsonNode> CREDENTIALS;
@@ -34,6 +36,10 @@ public class Main {
             return;
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
+        Scanner control = new Scanner(System.in);
+            if(control.hasNext()) {
+                return;
+            }
     }
 
     private static SpecialBot login() {
@@ -45,6 +51,7 @@ public class Main {
         bot.addModule(new TempMembership(bot));
         bot.addModule(new Reddit(bot));
         bot.addModule(new Steam(bot));
+        bot.addModule(new Music(bot));
     }
 
 

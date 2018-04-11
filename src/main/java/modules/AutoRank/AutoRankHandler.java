@@ -24,9 +24,5 @@ public class AutoRankHandler {
         event.getUser().addRole(rando_role);
     }
 
-    @EventSubscriber
-    public void onUserRoleUpdate(UserRoleUpdateEvent event){
-        if(event.getOldRoles().contains(rando_role))
-            event.getNewRoles().remove(rando_role);
-    }
+
 }

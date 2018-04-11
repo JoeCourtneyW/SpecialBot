@@ -14,9 +14,11 @@ import utils.LoggerUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class SpecialBot {
 
@@ -36,7 +38,7 @@ public class SpecialBot {
         return client;
     }
 
-    public ExecutorService getAsyncExecutor(){
+    public ExecutorService getAsyncExecutor() {
         return this.asyncExecutor;
     }
 
@@ -126,6 +128,7 @@ public class SpecialBot {
                 .appendContent(message)
                 .withChannel(pc));
     }
+
     /*Format options for chat messages, just for reference
         ITALICS("*"),
 		BOLD("**"),
@@ -138,4 +141,17 @@ public class SpecialBot {
 		CODE_BLOCK("`"),
 		MULTI_LINE_CODE_BLOCK("```");
      */
+    public boolean tryDiscordFunction(Runnable runnable) {
+        try {
+            runnable.run();
+            return true;
+        } catch (RateLimitException e) {
+            LoggerUtil.CRITICAL("Slow down! The bot is attempting actions too quickly!" + " Please wait " + e.getRetryDelay() + "ms");
+        } catch (DiscordException e) {
+            LoggerUtil.CRITICAL("Discord Exception: " + e.getErrorMessage());
+        } catch (MissingPermissionsException e) {
+            LoggerUtil.CRITICAL("The bot is missing permissions for this action" + e.getMissingPermissions().toString());
+        }
+        return false;
+    }
 }
