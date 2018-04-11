@@ -204,24 +204,26 @@ public class AudioManager extends CommandExecutor {
     }
 
     public static void queueYoutube(IChannel channel, String url, String title) throws RateLimitException, DiscordException, MissingPermissionsException {
-        File audioFile = downloadYoutubeURL(url, title, channel.getGuild());
-        if (audioFile == null)
-            return;
-        if (!audioFile.exists())
-            channel.sendMessage("That file doesn't exist!");
-        else if (!audioFile.canRead())
-            channel.sendMessage("I don't have access to that file!");
-        else {
-            try {
-                Track t = getPlayer(channel.getGuild()).queue(audioFile);
-                setTrackTitle(t, title);
-                setTrackFile(t, audioFile);
-            } catch (IOException e) {
-                channel.sendMessage("An IO exception occured: " + e.getMessage());
-            } catch (UnsupportedAudioFileException e) {
-                channel.sendMessage("That type of file is not supported!");
+        bot.getAsyncExecutor().submit(()-> {
+            File audioFile = downloadYoutubeURL(url, title, channel.getGuild());
+            if (audioFile == null)
+                return;
+            if (!audioFile.exists())
+                channel.sendMessage("That file doesn't exist!");
+            else if (!audioFile.canRead())
+                channel.sendMessage("I don't have access to that file!");
+            else {
+                try {
+                    Track t = getPlayer(channel.getGuild()).queue(audioFile);
+                    setTrackTitle(t, title);
+                    setTrackFile(t, audioFile);
+                } catch (IOException e) {
+                    channel.sendMessage("An IO exception occured: " + e.getMessage());
+                } catch (UnsupportedAudioFileException e) {
+                    channel.sendMessage("That type of file is not supported!");
+                }
             }
-        }
+        });
     }
 
     public static void pause(IChannel channel, boolean pause) {
@@ -306,7 +308,8 @@ public class AudioManager extends CommandExecutor {
         }
 
     }
-    private static String getYoutubeIdFromUrl(String url){
+
+    private static String getYoutubeIdFromUrl(String url) {
         String id;
         if (url.contains("youtu.be")) {
             id = url.split("/")[1];
@@ -335,25 +338,17 @@ public class AudioManager extends CommandExecutor {
         }
 
         bot.sendChannelMessage("Downloading file...", lastChannel.get(g));
-        Future future = bot.getAsyncExecutor().submit(() -> {
-            try {
-                downloading = true;
-                Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, new File(musicRoot));
-                InputStream is = p.getInputStream();
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                String line;
-                p.waitFor();
-                //Runtime.getRuntime().exec("sudo chmod 777 " + musicRoot + File.separator + id + " ");
-                downloading = false;
-            } catch (IOException | InterruptedException e) {
-                downloading = false;
-            }
-        });
         try {
-            future.get(); // use future to hold the function until the async executor is done
-        } catch (ExecutionException | InterruptedException ex) {
-            return new File(path);
+            downloading = true;
+            Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, new File(musicRoot));
+
+            p.waitFor();
+            //Runtime.getRuntime().exec("sudo chmod 777 " + musicRoot + File.separator + id + " ");
+            downloading = false;
+        } catch (IOException | InterruptedException e) {
+            downloading = false;
         }
+
         return new File(path);
     }
 }
