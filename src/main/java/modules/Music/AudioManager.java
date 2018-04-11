@@ -51,7 +51,7 @@ public class AudioManager extends CommandExecutor {
     //TODO Playlists, Download song only
     static ConcurrentHashMap<IGuild, IChannel> lastChannel = new ConcurrentHashMap<>();
 
-    @Command(label = "queue", description = "Add a song to the song queue")
+    @Command(label = "queue", description = "Add a song to the song queue", alias = "play")
     public static void queueCommand(IMessage im) {
         lastChannel.put(im.getGuild(), im.getChannel());
         String[] split = im.getContent().split(" ");
@@ -170,6 +170,8 @@ public class AudioManager extends CommandExecutor {
         Timer t = new Timer();
         t.schedule(new TimerTask() {
             public void run() {
+                if (getPlayer(guild).getCurrentTrack().getMetadata().get("title").equals(event.getTrack().getMetadata().get("title")))
+                    return;
                 bot.tryDiscordFunction(() ->
                         lastChannel.get(guild).sendMessage("Added **" + getTrackTitle(event.getTrack()) + "** to the queue."));
             }
