@@ -32,6 +32,7 @@ public class SpecialBot {
         modules = new ArrayList<>();
         this.asyncExecutor = Executors.newFixedThreadPool(2);
         registerCommandsHandler();
+
     }
 
     public IDiscordClient getClient() {

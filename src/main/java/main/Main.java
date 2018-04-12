@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import modules.AutoRank.AutoRank;
 import modules.Music.Music;
 import modules.Reddit.Reddit;
+import modules.Steam.CommandSearch;
 import modules.Steam.Steam;
 import modules.TempMembership.TempMembership;
 import sx.blah.discord.api.ClientBuilder;
@@ -36,6 +37,9 @@ public class Main {
             return;
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
+
+        test_code();
+
         Scanner control = new Scanner(System.in);
         if (control.nextLine().equalsIgnoreCase("exit")) {
             bot.getClient().logout();
@@ -94,5 +98,9 @@ public class Main {
     public void onReady(ReadyEvent event) {
         bot.setupClient(CREDENTIALS.get("CLIENT_ID").asText());
         activateModules();
+    }
+
+    private static void test_code() {
+        //Place test code in this block and it will be run on startup
     }
 }
