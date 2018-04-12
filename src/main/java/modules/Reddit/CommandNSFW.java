@@ -39,12 +39,7 @@ public class CommandNSFW extends CommandExecutor {
         ArrayList<Submission> images = new ArrayList<>();
         boolean multiReddit = false;
         String search = defaultSubreddit;
-        boolean download_all = false;
         int limit = 100;
-
-        if(args.length == 4)
-            if(args[3].equalsIgnoreCase("download"))
-                download_all = true;
 
         if (args.length >= 3) {
             multiReddit = args[1].toLowerCase().contains("m");
@@ -73,23 +68,6 @@ public class CommandNSFW extends CommandExecutor {
         } else {
             listing = cache.get(search);
         }
-        if(download_all){
-            //DUMB TEST TO DOWNLOAD ALL IMAGES, HAHAHA
-            LoggerUtil.INFO("Downloading all images... This may take a second...");
-            for(Submission post : listing){
-                LoggerUtil.DEBUG(post.getUrl());
-                if (post.getDomain().contains("i.imgur.com") || post.getDomain().contains("i.redd.it") || post.getDomain().contains("gfycat.com")) {
-                    downloadImage(post);
-                } else if (post.getDomain().contains("imgur.com")) {
-                    String url = "https://i.imgur.com";
-                    url += post.getUrl().substring(post.getUrl().lastIndexOf('/'));
-                    url += ".jpg";
-                    downloadImage(post.getSubreddit(), url, post.getId());
-                }
-            }
-            return;
-        }
-
         int index = new Random().nextInt(listing.size());
         Submission post = listing.get(index);
         while (true) {
