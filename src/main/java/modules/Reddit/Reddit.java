@@ -28,7 +28,7 @@ public class Reddit extends SpecialModule{
         if (!new File(Main.DIR + "/nsfw").exists()) {
             new File(Main.DIR + "/nsfw").mkdir();
         }
-
+        authenticate();
         registerCommands(new CommandNSFW(bot));
         return true;
     }
