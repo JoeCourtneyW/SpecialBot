@@ -6,14 +6,6 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/.idea" />
-      <excludeFolder url="file://$MODULE_DIR$/modules" />
-      <excludeFolder url="file://$MODULE_DIR$/nsfw" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main/java/modules/_command_old" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main/java/modules/_config_old" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main/java/modules/_database_old" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main/resources/_audio_old" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
