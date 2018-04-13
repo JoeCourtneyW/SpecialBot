@@ -168,4 +168,11 @@ public class SpecialBot {
         }
         return false;
     }
+    public SpecialModule getModule(String moduleName){
+        for(SpecialModule module : getModules()){
+            if(module.getName().equalsIgnoreCase(moduleName))
+                return module;
+        }
+        return null;
+    }
 }

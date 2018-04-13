@@ -21,9 +21,9 @@ public class MusicCommands extends CommandExecutor {
     private Music music;
     private AudioManager audioManager;
 
-    public MusicCommands(Music music) {
-        super(music.getBot());
-        this.music = music;
+    public MusicCommands(SpecialBot bot) {
+        super(bot);
+        this.music = (Music) bot.getModule("Music");
         this.audioManager = music.getAudioManager();
     }
 

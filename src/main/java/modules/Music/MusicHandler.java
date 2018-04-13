@@ -1,6 +1,7 @@
 package modules.Music;
 
 import main.SpecialBot;
+import modules.SpecialModule;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.DiscordException;
@@ -15,9 +16,9 @@ public class MusicHandler {
     private Music music;
     private SpecialBot bot;
 
-    public MusicHandler(Music music) {
-        this.music = music;
-        this.bot = music.getBot();
+    public MusicHandler(SpecialBot bot) {
+        this.bot = bot;
+        this.music = (Music) bot.getModule("Music");
     }
 	/*
 	Track events

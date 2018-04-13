@@ -28,10 +28,10 @@ public class Music extends SpecialModule {
 
     public boolean enable() {
         registerYoutube();
+        registerCommands(new MusicCommands(bot));
+        registerHandlers(new MusicHandler(bot));
         youtubeWrapper = new YoutubeWrapper(this);
         audioManager = new AudioManager(this);
-        registerCommands(new MusicCommands(this));
-        registerHandlers(new MusicHandler(this));
         downloader = new Downloader(this);
         return true;
     }
