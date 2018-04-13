@@ -4,13 +4,14 @@ import main.SpecialBot;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
+import utils.AnnotationUtil;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
 public class CommandsHandler {
     private SpecialBot bot;
-    private String PREFIX = ".";
+    private String PREFIX = "."; //TODO: Make this guild specific
     private HashMap<Command, Method> commands = new HashMap<>();
 
     public CommandsHandler(SpecialBot bot){
@@ -18,8 +19,8 @@ public class CommandsHandler {
     }
 
     public void registerCommand(CommandExecutor executor) {
-        for (Method m : discord.utils.AnnotationUtil.getAnnotatedMethods(executor.getClass(), Command.class)) {
-            commands.put((Command) discord.utils.AnnotationUtil.getAnnotation(m, Command.class), m);
+        for (Method m :  AnnotationUtil.getAnnotatedMethods(executor.getClass(), Command.class)) {
+            commands.put((Command) AnnotationUtil.getAnnotation(m, Command.class), m);
         }
     }
 

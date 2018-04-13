@@ -35,7 +35,7 @@ public class CommandSearch extends CommandExecutor {
     }
 
     @Command(label = "search")
-    public static void onSearch(IMessage message) {
+    public void onSearch(IMessage message) {
         String[] args = message.getContent().split(" ");
         IChannel channel = message.getChannel();
 
@@ -80,7 +80,7 @@ public class CommandSearch extends CommandExecutor {
      * @param query What to look up
      * @return The appid that matches closest to the given query
      */
-    public static JsonNode searchForGame(String query) {
+    private JsonNode searchForGame(String query) {
         StringMetric metric = StringMetricBuilder.with(new SimonWhite<>())
                 .simplify(Simplifiers.toLowerCase())
                 .tokenize(Tokenizers.whitespace())
@@ -113,7 +113,7 @@ public class CommandSearch extends CommandExecutor {
         return bestResult;
     }
 
-    private static InputStream getStreamFromUrl(String url) {
+    private InputStream getStreamFromUrl(String url) {
         try {
             return new URL(url).openStream();
         } catch (IOException e) {
@@ -122,7 +122,7 @@ public class CommandSearch extends CommandExecutor {
         }
     }
 
-    private static JsonNode getRootNode(InputStream stream) {
+    private JsonNode getRootNode(InputStream stream) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readTree(stream);

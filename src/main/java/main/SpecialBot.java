@@ -4,6 +4,7 @@ import main.Commands.CommandsHandler;
 import modules.SpecialModule;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.impl.obj.VoiceChannel;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MessageBuilder;
@@ -83,6 +84,18 @@ public class SpecialBot {
             //INSTANCE.client.changeAvatar(i);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public boolean joinVoiceChannel(IChannel channel){
+        IVoiceChannel voiceChannel = channel.getGuild().getVoiceChannelByID(channel.getLongID()); //Convert IChannel given by user into a voice channel
+        if (!voiceChannel.getModifiedPermissions(getClient().getOurUser()).contains(Permissions.VOICE_CONNECT))
+            return false;
+        else if (voiceChannel.getConnectedUsers().size() >= voiceChannel.getUserLimit() && voiceChannel.getUserLimit() > 0)
+            return false;
+        else {
+            voiceChannel.join();
+            return true;
         }
     }
 

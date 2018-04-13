@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.time.Duration;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -36,324 +36,107 @@ import sx.blah.discord.util.audio.events.TrackQueueEvent;
 import sx.blah.discord.util.audio.events.TrackStartEvent;
 import utils.LoggerUtil;
 
-@SuppressWarnings("unused")
-public class AudioManager extends CommandExecutor {
+public class AudioManager{
 
-    private static SpecialBot bot;
-    private static File music_dir;
+    private Music music;
 
-    public AudioManager(SpecialBot bot) {
-        super(bot);
-        AudioManager.bot = bot;
-        music_dir = new File(Main.DIR + File.separator + "music" + File.separator);
+    public AudioManager(Music music) {
+        this.music = music;
     }
 
     //TODO Playlists, Download song only
-    static ConcurrentHashMap<IGuild, IChannel> lastChannel = new ConcurrentHashMap<>();
-
-    @Command(label = "queue", description = "Add a song to the song queue", alias = "play")
-    public static void queueCommand(IMessage im) {
-        lastChannel.put(im.getGuild(), im.getChannel());
-        String[] split = im.getContent().split(" ");
-        String[] args = split.length > 1 ? Arrays.copyOfRange(split, 1, split.length) : new String[0];
-        if (args.length < 1) {
-            StringBuilder sb = new StringBuilder();
-            long total = 0;
-            for (int i = 0; i < getPlayer(im.getGuild()).getPlaylistSize(); i++) {
-                Track track = getPlayer(im.getGuild()).getPlaylist().get(i);
-                File f = (File) track.getMetadata().get("file");
-                long dur = 0;
-                try {
-                    dur = getDuration(f);
-                } catch (Exception e) {
-                    bot.sendChannelMessage("An internal error occured (IOE)", im.getChannel());
-                }
-
-                if (i == 0) {
-                    sb.append("Playing: **").append(getTrackTitle(track)).append("** - *").append(getCurrentTrackTime(track)).append("*\n");
-                    total += (dur - track.getCurrentTrackTime());
-                } else {
-                    sb.append((i)).append(") **").append(getTrackTitle(track)).append("** - *").append(getTrackLength(track)).append("*\n");
-                    total += dur;
-                }
-            }
-            sb.append("Total Queue Length: ***").append(convertMilli(total)).append("***");
-            if (total > 0)
-                bot.sendChannelMessage(sb.toString(), im.getChannel());
-            else
-                bot.sendChannelMessage("The queue is empty!", im.getChannel());
-            return;
-
-        }
-        if (bot.getClient().getConnectedVoiceChannels().size() == 0) {
-            bot.tryDiscordFunction(() ->
-                    join(im.getChannel(), im.getAuthor()));
-        }
-        if (isURL(args[0])) {
-            bot.tryDiscordFunction(() ->
-                    queueYoutube(im.getChannel(), args[0], YoutubeWrapper.getTitle(args[0])));
-
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (String a : args) {
-                sb.append(a).append(" ");
-            }
-            sb.setLength(sb.length() - 1);
-            String id;
-            String title;
-            try {
-                String[] data = YoutubeWrapper.search(sb.toString());
-                id = data[0];
-                title = data[1];
-            } catch (IOException e) {
-                bot.sendChannelMessage("An internal error occured (IOE)", im.getChannel());
-                return;
-            }
-            String url = "https://www.youtube.com/watch?v=" + id;
-            bot.tryDiscordFunction(() ->
-                    queueYoutube(im.getChannel(), url, title));
-        }
-        //MessageUtils.sendChannelMessage("That is not a valid Youtube URL!", im.getChannel());
-
-
-    }
-
-    private static boolean isURL(String url) {
-        try {
-            new URL(url);
-            return true;
-        } catch (MalformedURLException e) {
-            return false;
-        }
-    }
-
-    @Command(label = "unpause", description = "Unpause the music")
-    public static void playCommand(IMessage im) {
-        lastChannel.put(im.getGuild(), im.getChannel());
-        if (bot.getClient().getConnectedVoiceChannels().size() == 0) {
-            bot.tryDiscordFunction(() ->
-                    join(im.getChannel(), im.getAuthor()));
-        }
-        pause(im.getChannel(), false);
-    }
-
-    @Command(label = "pause", description = "Pause the music")
-    public static void pauseCommand(IMessage im) {
-        lastChannel.put(im.getGuild(), im.getChannel());
-        pause(im.getChannel(), true);
-    }
-
-    @Command(label = "skip", description = "Skip the current song")
-    public static void skipCommand(IMessage im) {
-        lastChannel.put(im.getGuild(), im.getChannel());
-        skip(im.getChannel());
-        pause(im.getChannel(), false);
-    }
-
-    @Command(label = "volume", description = "Change the volume of the client")
-    public static void volumeCommand(IMessage im) {
-        lastChannel.put(im.getGuild(), im.getChannel());
-        try {
-            volume(im.getChannel(), Integer.parseInt(im.getContent().split(" ")[1]));
-        } catch (NumberFormatException e) {
-            bot.sendChannelMessage("Invalid Volume Percentage", im.getChannel());
-        }
-    }
-
-	/*
-	Track events
-	 */
-
-    @EventSubscriber
-    public void onTrackQueue(final TrackQueueEvent event) throws RateLimitException, DiscordException, MissingPermissionsException {
-        final IGuild guild = event.getPlayer().getGuild();
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            public void run() {
-                if (getPlayer(guild).getCurrentTrack().getMetadata().get("title").equals(event.getTrack().getMetadata().get("title")))
-                    return;
-                bot.tryDiscordFunction(() ->
-                        lastChannel.get(guild).sendMessage("Added **" + getTrackTitle(event.getTrack()) + "** to the queue."));
-            }
-        }, 500);
-    }
-
-    @EventSubscriber
-    public void onTrackStart(TrackStartEvent event) {
-        IGuild guild = event.getPlayer().getGuild();
-        bot.sendChannelMessage("Now playing **" + getTrackTitle(event.getTrack()) + "**.", lastChannel.get(guild));
-    }
+    private ConcurrentHashMap<IGuild, IChannel> lastChannelControlledFrom = new ConcurrentHashMap<>();
 
 	/*
 	Audio player methods
 	 */
 
-    public static void join(IChannel channel, IUser user) throws RateLimitException, DiscordException, MissingPermissionsException {
-        if (user.getVoiceStates().size() < 1)
-            channel.sendMessage("You aren't in a voice channel!");
-        else {
-            IVoiceChannel voice = user.getVoiceStateForGuild(channel.getGuild()).getChannel();
-            if (!voice.getModifiedPermissions(bot.getClient().getOurUser()).contains(Permissions.VOICE_CONNECT))
-                channel.sendMessage("I can't join that voice channel!");
-            else if (voice.getConnectedUsers().size() >= voice.getUserLimit() && voice.getUserLimit() > 0)
-                channel.sendMessage("That room is full!");
-            else {
-                voice.join();
-            }
-        }
-    }
-
-    public static void queueYoutube(IChannel channel, String url, String title) {
-        bot.getAsyncExecutor().submit(() -> {
-            if (YoutubeWrapper.getDuration(getYoutubeIdFromUrl(url)) > 1000 * 60 * 10) {
-                bot.sendChannelMessage("That video is too long to play! Videos must be under 10 minutes", channel);
+    public void queueYoutube(IChannel channel, String url, String title) {
+        music.getBot().getAsyncExecutor().submit(() -> {
+            if (music.getYoutubeWrapper().getVideoDuration(YoutubeWrapper.getIdFromUrl(url)) > 1000 * 60 * 10) {
+                music.getBot().sendChannelMessage("That video is too long to play! Videos must be under 10 minutes", channel);
                 return;
             }
-            File audioFile = downloadYoutubeURL(url, title, channel.getGuild());
+            File audioFile = music.getDownloader().downloadYoutubeURL(url);
             if (audioFile == null) {
-                bot.sendChannelMessage("Audio file received as null from download", channel);
+                music.getBot().sendChannelMessage("Audio file received as null from download. Contact an administrator", channel);
             } else if (!audioFile.exists())
-                bot.sendChannelMessage("That file doesn't exist!", channel);
+                music.getBot().sendChannelMessage("That file doesn't exist! Contact an administrator", channel);
             else if (!audioFile.canRead())
-                bot.sendChannelMessage("I don't have access to that file!", channel);
+                music.getBot().sendChannelMessage("I don't have access to that file! Contact an administrator", channel);
             else {
                 try {
-                    LoggerUtil.DEBUG("Adding file to queue");
-                    Track t = getPlayer(channel.getGuild()).queue(audioFile);
-                    setTrackTitle(t, title);
-                    setTrackFile(t, audioFile);
+                    Track t = getAudioPlayer(channel.getGuild()).queue(audioFile);
+                    setupTrack(t, audioFile, title);
                 } catch (IOException e) {
-                    bot.sendChannelMessage("An IO exception occured: " + e.getMessage(), channel);
+                    music.getBot().sendChannelMessage("An IO exception occured: " + e.getMessage(), channel);
                 } catch (UnsupportedAudioFileException e) {
-                    bot.sendChannelMessage("That type of file is not supported!", channel);
+                    music.getBot().sendChannelMessage("That type of file is not supported!", channel);
                 }
             }
         });
     }
 
-    public static void pause(IChannel channel, boolean pause) {
-        getPlayer(channel.getGuild()).setPaused(pause);
+    /*
+        End-User Methods
+     */
+    public void pauseTrack(IGuild guild, boolean pause) {
+        getAudioPlayer(guild).setPaused(pause);
     }
 
-    public static void skip(IChannel channel) {
-        getPlayer(channel.getGuild()).skip();
+    public void skipTrack(IGuild guild) {
+        getAudioPlayer(guild).skip();
     }
 
-    public static void volume(IChannel channel, int percent) {
-        volume(channel, (float) (percent) / 100);
+    //TODO: Make volume persistent through shutdowns
+    public void setVolume(IGuild guild, int percent){
+        float volume = (float) (percent)/100;
+        if(volume > 1.5) volume = 1.5f;
+        if(volume < 0) volume = 0f;
+        getAudioPlayer(guild).setVolume(volume);
     }
-
-    private static void volume(IChannel channel, Float vol) {
-        if (vol > 1.5) vol = 1.5f;
-        if (vol < 0) vol = 0f;
-        getPlayer(channel.getGuild()).setVolume(vol);
-        bot.sendChannelMessage("Set volume to **" + (int) (vol * 100) + "%**.", channel);
+    public void shuffle(IGuild guild){
+        getAudioPlayer(guild).shuffle();
+    }
+    public void setLooping(IGuild guild, boolean loop){
+        getAudioPlayer(guild).setLoop(loop);
+    }
+    public boolean isLooping(IGuild guild){
+        return getAudioPlayer(guild).isLooping();
     }
 
     /*
-    Utility methods
+        Utility Methods
      */
-    private static AudioPlayer getPlayer(IGuild guild) {
+    public AudioPlayer getAudioPlayer(IGuild guild) {
         return AudioPlayer.getAudioPlayerForGuild(guild);
     }
 
-    private static String getTrackTitle(Track track) {
+    public String getTrackTitle(Track track) {
         return track.getMetadata().containsKey("title") ? String.valueOf(track.getMetadata().get("title")) : "Unknown Track";
     }
 
-    private static String getTrackLength(Track track) {
-        File file = (File) track.getMetadata().get("file");
-        long dur = getDuration(file);
-        return String.format("%dm %02ds",
-                TimeUnit.MILLISECONDS.toMinutes(dur),
-                TimeUnit.MILLISECONDS.toSeconds(dur) % 60
-        );
+    public Duration getTrackLength(Track track){
+        return Duration.ofMillis(track.getTotalTrackTime());
     }
 
-    private static String getCurrentTrackTime(Track track) {
-        File file = (File) track.getMetadata().get("file");
-        long dur = getDuration(file);
-        return String.format("%dm %02ds / %dm %02ds",
-                TimeUnit.MILLISECONDS.toMinutes(track.getCurrentTrackTime()),
-                TimeUnit.MILLISECONDS.toSeconds(track.getCurrentTrackTime()) % 60,
-                TimeUnit.MILLISECONDS.toMinutes(dur),
-                TimeUnit.MILLISECONDS.toSeconds(dur) % 60
-        );
+    public Duration getTrackPosition(Track track){
+        return Duration.ofMillis(track.getCurrentTrackTime());
     }
 
-    private static String convertMilli(long milli) {
-        return String.format("%dm %02ds",
-                TimeUnit.MILLISECONDS.toMinutes(milli),
-                TimeUnit.MILLISECONDS.toSeconds(milli) % 60
-        );
-    }
-
-    private static void setTrackTitle(Track track, String title) {
+    private void setupTrack(Track track, File file, String title){
+        track.getMetadata().put("file", file);
         track.getMetadata().put("title", title);
     }
 
-    private static void setTrackFile(Track track, File f) {
-        track.getMetadata().put("file", f);
+    public IChannel getLastChannelControlledFrom(IGuild guild){
+        return lastChannelControlledFrom.get(guild);
+    }
+    public void setLastChannelControlledFrom(IGuild guild, IChannel channel){
+        lastChannelControlledFrom.put(guild, channel);
     }
 
-    private static long getDuration(File file) {
-        AudioFileFormat fileFormat;
-        try {
-            fileFormat = AudioSystem.getAudioFileFormat(file);
-        } catch (IOException | UnsupportedAudioFileException e) {
-            return 0;
-        }
-        if (fileFormat instanceof TAudioFileFormat) {
-            Map<?, ?> properties = fileFormat.properties();
-            String key = "duration";
-            Long microseconds = (Long) properties.get(key);
-            return microseconds / 1000;
-        } else {
-            return 0;
-        }
 
-    }
 
-    public static String getYoutubeIdFromUrl(String url) {
-        String id;
-        if (url.contains("youtu.be")) {
-            id = url.split("/")[1];
-        } else {
-            id = url.split("\\?v=")[1];
-            if (id.contains("&"))
-                id = id.split("&")[0];
-        }
-        return id;
-    }
 
-    private static boolean downloading = false;
-
-    private static File downloadYoutubeURL(final String url, String title, IGuild g) {
-        final String id = getYoutubeIdFromUrl(url);
-        String path = music_dir.getPath() + File.separator;
-
-        path += id + ".mp3";
-        if (new File(path).exists()) {
-            LoggerUtil.DEBUG("File already downloaded, continuing");
-            return new File(path);
-        }
-        if (downloading) {
-            bot.sendChannelMessage("I'm already downloading a file! Please wait", lastChannel.get(g));
-            return null;
-        }
-
-        bot.sendChannelMessage("Downloading file...", lastChannel.get(g));
-        try {
-            downloading = true;
-            Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, music_dir);
-            LoggerUtil.DEBUG("Downloading youtube mp3 from " + url);
-            p.waitFor();
-            LoggerUtil.DEBUG("File downloaded");
-            downloading = false;
-        } catch (IOException | InterruptedException e) {
-            downloading = false;
-        }
-
-        return new File(path);
-    }
 }

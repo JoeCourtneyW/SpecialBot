@@ -1,4 +1,4 @@
-package discord.utils;
+package utils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

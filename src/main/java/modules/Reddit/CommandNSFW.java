@@ -71,72 +71,13 @@ public class CommandNSFW extends CommandExecutor {
         int index = new Random().nextInt(listing.size());
         Submission post = listing.get(index);
         while (true) {
-            LoggerUtil.DEBUG(post.getUrl());
-            String EXISTS_PATH = Main.DIR + "\\nsfw\\r\\" + post.getSubreddit() + "\\" + post.getId();
-            if (post.getDomain().contains("i.imgur.com") || post.getDomain().contains("i.redd.it") || post.getDomain().contains("gfycat.com")) {
-                File image = downloadImage(post);
-                if (image.length() > 5000000 || image.getName().endsWith("mp4")) { //If the file size exceeds the 5MB maximum file size upload, just send the link. or if its an mp4
-                    bot.sendChannelMessage("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*" + "\n" + post.getUrl(), message.getChannel());
-                    return;
-                }
-                bot.sendFile("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*", image, message.getChannel());
-                return;
-            } else if (post.getDomain().contains("imgur.com")) {
-                String url = "https://i.imgur.com";
-                url += post.getUrl().substring(post.getUrl().lastIndexOf('/'));
-                url += ".jpg";
-
-                File image = downloadImage(post.getSubreddit(), url, post.getId());
-                bot.sendFile("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*", image, message.getChannel());
+            if (post.getDomain().contains("imgur.com") || post.getDomain().contains("i.redd.it") || post.getDomain().contains("gfycat.com")) {
+                bot.sendChannelMessage("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*" + "\n" + post.getUrl(), message.getChannel());
                 return;
             } else {
                 index = new Random().nextInt(listing.size());
                 post = listing.get(index);
             }
         }
-    }
-
-    private static File downloadImage(Submission post) {
-        return downloadImage(post.getSubreddit(), post.getUrl(), post.getId());
-    }
-
-    private static File downloadImage(String subreddit, String url, String id) {
-        if (url.contains("?")) {
-            url = url.split("\\?")[0];
-        }
-        String IMGUR_DL_LINK = "https://imgur.com/download";
-        String GFYCAT_DL_LINK = "https://giant.gfycat.com";
-
-        subreddit = "r" + "\\" + subreddit;
-        String PATH = Main.DIR + "\\nsfw\\" + subreddit + "\\";
-        if (!new File(PATH).exists()) new File(PATH).mkdir();
-        PATH += id.trim();
-        String EXTENSION = url.substring(url.lastIndexOf('.')).trim();
-
-        if (url.contains("gfycat")) {
-            url = GFYCAT_DL_LINK + url.substring(url.lastIndexOf('/')) + ".mp4";
-            EXTENSION = ".mp4";
-        }
-        if (EXTENSION.equalsIgnoreCase(".gifv")) {
-            url = IMGUR_DL_LINK + url.substring(url.lastIndexOf('/')).split("\\.")[0];
-            EXTENSION = ".gif";
-        }
-
-        if (!new File(PATH + EXTENSION).exists()) {
-            try (InputStream in = new URL(url).openStream()) {
-                Files.copy(in, Paths.get(PATH + EXTENSION));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return new File(PATH + EXTENSION);
-    }
-
-    public String getExtension(String url) {
-        if (url.contains("?")) {
-            url = url.split("\\?")[0];
-        }
-        String EXTENSION = url.substring(url.lastIndexOf('.')).trim();
-        return ""; //TODO
     }
 }

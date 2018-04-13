@@ -3,28 +3,26 @@ package modules.Music;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Period;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
+import javafx.util.Pair;
 import main.Main;
 
 public class YoutubeWrapper {
 
-    /**
-     * Define a global variable that identifies the developer's API key.
-     */
-    private static final String API_KEY = Main.CREDENTIALS.get("GOOGLE_API_KEY").asText();
+    private Music music;
+    public YoutubeWrapper(Music music){
+        this.music = music;
+    }
 
-    private static final long NUMBER_OF_VIDEOS_RETURNED = 1;
+    private final String API_KEY = Main.CREDENTIALS.get("GOOGLE_API_KEY").asText();
 
     
-    public static String[] search(String query) throws IOException{
+    public Pair<String, String> searchForVideo(String query) throws IOException{
     	// Define the API request for retrieving search results.
-        YouTube.Search.List search = Music.youtube.search().list("id,snippet");
+        YouTube.Search.List search = music.getYoutube().search().list("id,snippet");
 
         search.setQ(query);
 
@@ -37,20 +35,17 @@ public class YoutubeWrapper {
         // To increase efficiency, only retrieve the fields that the
         // application uses.
         search.setFields("items(id/videoId,snippet/title)");
-        search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+        search.setMaxResults(1L);
 
         // Call the API
-        SearchListResponse searchResponse = search.execute();
-        List<SearchResult> searchResultList = searchResponse.getItems();
-        String[] data = new String[2];
-        data[0] = searchResultList.get(0).getId().getVideoId();
-        data[1] = searchResultList.get(0).getSnippet().getTitle();
-        return data;
+        List<SearchResult> searchResultList = search.execute().getItems();
+        String id = searchResultList.get(0).getId().getVideoId();
+        String title = searchResultList.get(0).getSnippet().getTitle();
+        return new Pair<>(id, title);
     }
-    public static String getTitle(String url){
+    public String getVideoTitle(String id){
         try {
-            YouTube.Videos.List list = Music.youtube.videos().list("snippet");
-            String id = AudioManager.getYoutubeIdFromUrl(url);
+            YouTube.Videos.List list = music.getYoutube().videos().list("snippet");
             list.setId(id);
             list.setKey(API_KEY);
             return list.execute().getItems().get(0).getSnippet().getTitle();
@@ -59,9 +54,9 @@ public class YoutubeWrapper {
             return "";
         }
     }
-    public static long getDuration(String id){
+    public long getVideoDuration(String id){
         try {
-            YouTube.Videos.List list = Music.youtube.videos().list("contentDetails");
+            YouTube.Videos.List list = music.getYoutube().videos().list("contentDetails");
             list.setId(id);
             list.setKey(API_KEY);
             return Duration.parse(list.execute().getItems().get(0).getContentDetails().getDuration()).toMillis();
@@ -69,5 +64,17 @@ public class YoutubeWrapper {
             e.printStackTrace();
             return -1;
         }
+    }
+    public static String getIdFromUrl(String url) {
+        //TODO: Craft regex to determine if the url given is a youtube url
+        String id;
+        if (url.contains("youtu.be")) {
+            id = url.split("/")[1];
+        } else {
+            id = url.split("\\?v=")[1];
+            if (id.contains("&"))
+                id = id.split("&")[0];
+        }
+        return id;
     }
 }
