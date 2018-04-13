@@ -58,8 +58,9 @@ public class SpecialBot {
     }
 
     public void addModule(SpecialModule module) {
-        if (enableModule(module))
-            modules.add(module);
+        modules.add(module);
+        if (!enableModule(module))
+            modules.remove(module);
     }
 
     private boolean enableModule(SpecialModule module) {
