@@ -52,7 +52,7 @@ public class AudioManager{
 	 */
 
     public void queueYoutube(IChannel channel, String url, String title) {
-        music.getBot().getAsyncExecutor().submit(() -> {
+        music.getDownloader().getDownloadThreads().submit(() -> {
             if (music.getYoutubeWrapper().getVideoDuration(YoutubeWrapper.getIdFromUrl(url)) > 1000 * 60 * 10) {
                 music.getBot().sendChannelMessage("That video is too long to play! Videos must be under 10 minutes", channel);
                 return;

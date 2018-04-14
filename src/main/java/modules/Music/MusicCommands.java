@@ -1,5 +1,6 @@
 package modules.Music;
 
+import com.sun.javafx.binding.StringFormatter;
 import javafx.util.Pair;
 import main.Commands.Command;
 import main.Commands.CommandExecutor;
@@ -42,15 +43,17 @@ public class MusicCommands extends CommandExecutor {
 
                 if (i == 0) {
                     queueList.append("Playing: **").append(audioManager.getTrackTitle(track)).append("** - *")
-                            .append(audioManager.getTrackPosition(track)).append("*\n");
+                            .append(getReadableDuration(audioManager.getTrackPosition(track))).append("*")
+                            .append(" */* ")
+                            .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
                     total += (trackDuration - track.getCurrentTrackTime());
                 } else {
                     queueList.append((i)).append(") **").append(audioManager.getTrackTitle(track)).append("** - *")
-                            .append(audioManager.getTrackLength(track)).append("*\n");
+                            .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
                     total += trackDuration;
                 }
             }
-            queueList.append("Total Queue Length: ***").append(Duration.ofMillis(total)).append("***");
+            queueList.append("Total Queue Length: ***").append(getReadableDuration(Duration.ofMillis(total))).append("***");
             if (total > 0)
                 bot.sendChannelMessage(queueList.toString(), im.getChannel());
             else
@@ -138,5 +141,21 @@ public class MusicCommands extends CommandExecutor {
         } catch (MalformedURLException e) {
             return null;
         }
+    }
+    private String getReadableDuration(Duration duration){
+        StringBuilder format = new StringBuilder();
+        if(duration.toMinutes() >= 60){
+            format.append(((int)Math.floor(duration.toHours())));
+            format.append("h ");
+        }
+        if(duration.toMinutes()%60 > 0) {
+            format.append(((int) Math.floor(duration.toMinutes())) % 60);
+            format.append("m ");
+        }
+        if(duration.getSeconds()%3600 > 0) {
+            format.append(((int) Math.floor(duration.getSeconds())) % 3600);
+            format.append("s");
+        }
+        return format.toString();
     }
 }

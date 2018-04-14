@@ -3,11 +3,15 @@ package modules.TempMembership;
 import main.SpecialBot;
 import modules.SpecialModule;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class TempMembership extends SpecialModule{
     private String name = "Temporary Membership";
     private String version = "1.0";
 
     private MembershipTimer timer;
+    private ExecutorService membershipThread;
 
     public TempMembership(SpecialBot bot){
         super(bot);
@@ -15,8 +19,9 @@ public class TempMembership extends SpecialModule{
 
     public boolean enable() {
         this.timer = new MembershipTimer(bot.getClient());
-        bot.getAsyncExecutor().submit(() -> {
-           timer.start();
+        membershipThread = Executors.newFixedThreadPool(1);
+        membershipThread.submit(() -> {
+            timer.start();
         });
         return true;
     }

@@ -17,7 +17,6 @@ public class MembershipTimer extends Thread {
     }
 
     public void start() {
-        LoggerUtil.DEBUG("Temporary Membership thread started, checking for randos");
         while (true) {
             try {
                 Thread.sleep(1000 * 60 * 55);

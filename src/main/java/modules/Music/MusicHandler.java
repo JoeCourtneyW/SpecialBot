@@ -30,16 +30,26 @@ public class MusicHandler {
         if (music.getAudioManager().getAudioPlayer(guild).getCurrentTrack().getMetadata().get("title")
                 .equals(event.getTrack().getMetadata().get("title")))
             return;
-        bot.sendChannelMessage("Added **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "** to the queue.",
-                music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
 
+        new Timer().schedule( //waitUntilTrackDataIsSet
+                new TimerTask() {
+                    public void run() {
+                        bot.sendChannelMessage("Added **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "** to the queue.",
+                                music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
+                    }
+                }, 50);
     }
 
     @EventSubscriber
     public void onTrackStart(TrackStartEvent event) {
         IGuild guild = event.getPlayer().getGuild();
-        bot.sendChannelMessage("Now playing **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "**.",
-                music.getAudioManager().getLastChannelControlledFrom(guild));
+        new Timer().schedule( //waitUntilTrackDataIsSet
+                new TimerTask() {
+                    public void run() {
+                        bot.sendChannelMessage("Now playing **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "**.",
+                                music.getAudioManager().getLastChannelControlledFrom(guild));
+                    }
+                }, 50);
     }
 
     @EventSubscriber
