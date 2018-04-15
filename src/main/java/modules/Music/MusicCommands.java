@@ -7,7 +7,6 @@ import main.Commands.CommandExecutor;
 import main.JsonObjects.GuildOptions;
 import main.SpecialBot;
 import sx.blah.discord.util.audio.AudioPlayer;
-import utils.LoggerUtil;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,7 +30,6 @@ public class MusicCommands extends CommandExecutor {
         if (event.getArgs().length < 1) { //Show current queue if they aren't trying to queue a new song
             StringBuilder queueList = new StringBuilder();
             long total = 0;
-            LoggerUtil.DEBUG("Queue Size: " + audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylistSize());
             for (int i = 0; i < audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylistSize(); i++) {
 
                 AudioPlayer.Track track = audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylist().get(i);
@@ -43,13 +41,10 @@ public class MusicCommands extends CommandExecutor {
                             .append(" */* ")
                             .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
                     total += (trackDuration - audioManager.getTrackPosition(track).toMillis());
-                    LoggerUtil.DEBUG(i + " Duration: " + trackDuration);
-                    LoggerUtil.DEBUG(i + " Position: " + audioManager.getTrackPosition(track).toMillis());
                 } else {
                     queueList.append((i)).append(") **").append(audioManager.getTrackTitle(track)).append("** - *")
                             .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
                     total += trackDuration;
-                    LoggerUtil.DEBUG(i + " Duration: " + trackDuration);
                 }
             }
             queueList.append("Total Queue Length: ***").append(getReadableDuration(Duration.ofMillis(total))).append("***");
@@ -124,7 +119,7 @@ public class MusicCommands extends CommandExecutor {
     @Command(label = "volume", description = "Change the volume of the client")
     public void volumeCommand(CommandEvent event) {
         if (event.getArgs().length == 0) {
-            bot.sendChannelMessage("Curent Volume: " + ((int) (audioManager.getAudioPlayer(event.getChannel().getGuild()).getVolume() * 100)) + "%", event.getChannel());
+            bot.sendChannelMessage("Current Volume: " + audioManager.getVolume(event.getGuild()) + "%", event.getChannel());
             return;
         }
         audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
@@ -135,7 +130,7 @@ public class MusicCommands extends CommandExecutor {
             return;
         }
         GuildOptions options = bot.getGuildOptions(event.getChannel().getGuild());
-        options.BOT_VOLUME = audioManager.getAudioPlayer(event.getChannel().getGuild()).getVolume();
+        options.BOT_VOLUME = audioManager.getVolume(event.getGuild());
         bot.updateGuildOptions(options);
     }
 

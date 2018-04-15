@@ -42,7 +42,7 @@ public class Music extends SpecialModule {
     private void loadGuildOptions(){
         for(IGuild guild : bot.getClient().getGuilds()){
             GuildOptions guildOptions = bot.getGuildOptions(guild);
-            audioManager.setVolume(guild, (int) guildOptions.BOT_VOLUME*100);
+            audioManager.setVolume(guild, guildOptions.BOT_VOLUME);
         }
         //TODO: Load playlists into memory
     }

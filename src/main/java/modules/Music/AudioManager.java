@@ -1,17 +1,21 @@
 package modules.Music;
 
+import org.tritonus.share.sampled.file.TAudioFileFormat;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AudioManager{
+public class AudioManager {
 
     private Music music;
 
@@ -63,24 +67,31 @@ public class AudioManager{
         getAudioPlayer(guild).skip();
     }
 
-    //TODO: Make volume persistent through shutdowns
-    public void setVolume(IGuild guild, int percent){
-        float volume = (float) (percent)/100;
-        if(volume > 1.5) volume = 1.5f;
-        if(volume < 0) volume = 0f;
+    public void setVolume(IGuild guild, int percent) {
+        float volume = (float) (percent) / 100;
+        if (volume > 1.5) volume = 1.5f;
+        if (volume < 0) volume = 0f;
         getAudioPlayer(guild).setVolume(volume);
     }
-    public void setPosition(IGuild guild, long position){
+
+    public int getVolume(IGuild guild) {
+        float volume = getAudioPlayer(guild).getVolume();
+        return (int) Math.floor(volume * 100);
+    }
+
+    public void setPosition(IGuild guild, long position) {
         getAudioPlayer(guild).getCurrentTrack().fastForwardTo(position);
     }
 
-    public void shuffle(IGuild guild){
+    public void shuffle(IGuild guild) {
         getAudioPlayer(guild).shuffle();
     }
-    public void setLooping(IGuild guild, boolean loop){
+
+    public void setLooping(IGuild guild, boolean loop) {
         getAudioPlayer(guild).setLoop(loop);
     }
-    public boolean isLooping(IGuild guild){
+
+    public boolean isLooping(IGuild guild) {
         return getAudioPlayer(guild).isLooping();
     }
 
@@ -95,27 +106,44 @@ public class AudioManager{
         return track.getMetadata().containsKey("title") ? String.valueOf(track.getMetadata().get("title")) : "Unknown Track";
     }
 
-    public Duration getTrackLength(Track track){
-        return Duration.ofMillis(track.getTotalTrackTime());
+    public Duration getTrackLength(Track track) {
+        return Duration.ofMillis(getDuration((File) track.getMetadata().get("file")));
     }
 
-    public Duration getTrackPosition(Track track){
+    //Track#getTotalTrackTime() doesn't return the actual duration of the track, so just use the non-discord4j way
+    private long getDuration(File file) {
+        AudioFileFormat fileFormat;
+        try {
+            fileFormat = AudioSystem.getAudioFileFormat(file);
+        } catch (IOException | UnsupportedAudioFileException e) {
+            return 0;
+        }
+        if (fileFormat instanceof TAudioFileFormat) {
+            Map<?, ?> properties = fileFormat.properties();
+            String key = "duration";
+            Long microseconds = (Long) properties.get(key);
+            return microseconds / 1000;
+        } else {
+            return 0;
+        }
+    }
+
+    public Duration getTrackPosition(Track track) {
         return Duration.ofMillis(track.getCurrentTrackTime());
     }
 
-    private void setupTrack(Track track, File file, String title){
+    private void setupTrack(Track track, File file, String title) {
         track.getMetadata().put("file", file);
         track.getMetadata().put("title", title);
     }
 
-    public IChannel getLastChannelControlledFrom(IGuild guild){
+    public IChannel getLastChannelControlledFrom(IGuild guild) {
         return lastChannelControlledFrom.get(guild);
     }
-    public void setLastChannelControlledFrom(IGuild guild, IChannel channel){
+
+    public void setLastChannelControlledFrom(IGuild guild, IChannel channel) {
         lastChannelControlledFrom.put(guild, channel);
     }
-
-
 
 
 }
