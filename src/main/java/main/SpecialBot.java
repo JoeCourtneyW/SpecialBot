@@ -36,7 +36,7 @@ public class SpecialBot {
 
     public void setupClient(String client_id) {
         setupGuildOptions();
-        String version = "";
+        String version;
         try {
             Properties botProperties = new Properties();
             botProperties.load(ClassLoader.getSystemResourceAsStream("project.properties"));
@@ -51,6 +51,9 @@ public class SpecialBot {
         if (client.getGuilds().size() == 0) {
             LoggerUtil.CRITICAL("You need to add this bot to a server. Use the link below:");
             LoggerUtil.INFO("https://discordapp.com/api/oauth2/authorize?client_id=" + client_id + "&scope=bot");
+        }
+        for(IVoiceChannel channel : client.getConnectedVoiceChannels()){
+            channel.leave();//If bot autoconnects to a channel when it logs back in, leave that channel
         }
         client.changeUsername("Special Boi");
         client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, version);

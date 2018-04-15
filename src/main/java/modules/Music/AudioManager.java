@@ -1,40 +1,15 @@
 package modules.Music;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalUnit;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
-import main.Commands.Command;
-import main.Commands.CommandExecutor;
-import main.Main;
-import main.SpecialBot;
-import org.tritonus.share.sampled.file.TAudioFileFormat;
-import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
-import sx.blah.discord.util.audio.events.TrackQueueEvent;
-import sx.blah.discord.util.audio.events.TrackStartEvent;
-import utils.LoggerUtil;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AudioManager{
 
@@ -95,6 +70,10 @@ public class AudioManager{
         if(volume < 0) volume = 0f;
         getAudioPlayer(guild).setVolume(volume);
     }
+    public void setPosition(IGuild guild, long position){
+        getAudioPlayer(guild).getCurrentTrack().fastForwardTo(position);
+    }
+
     public void shuffle(IGuild guild){
         getAudioPlayer(guild).shuffle();
     }

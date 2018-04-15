@@ -7,6 +7,7 @@ import main.Commands.CommandExecutor;
 import main.JsonObjects.GuildOptions;
 import main.SpecialBot;
 import sx.blah.discord.util.audio.AudioPlayer;
+import utils.LoggerUtil;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,6 +31,7 @@ public class MusicCommands extends CommandExecutor {
         if (event.getArgs().length < 1) { //Show current queue if they aren't trying to queue a new song
             StringBuilder queueList = new StringBuilder();
             long total = 0;
+            LoggerUtil.DEBUG("Queue Size: " + audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylistSize());
             for (int i = 0; i < audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylistSize(); i++) {
 
                 AudioPlayer.Track track = audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylist().get(i);
@@ -41,10 +43,13 @@ public class MusicCommands extends CommandExecutor {
                             .append(" */* ")
                             .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
                     total += (trackDuration - audioManager.getTrackPosition(track).toMillis());
+                    LoggerUtil.DEBUG(i + " Duration: " + trackDuration);
+                    LoggerUtil.DEBUG(i + " Position: " + audioManager.getTrackPosition(track).toMillis());
                 } else {
                     queueList.append((i)).append(") **").append(audioManager.getTrackTitle(track)).append("** - *")
                             .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
                     total += trackDuration;
+                    LoggerUtil.DEBUG(i + " Duration: " + trackDuration);
                 }
             }
             queueList.append("Total Queue Length: ***").append(getReadableDuration(Duration.ofMillis(total))).append("***");
@@ -55,11 +60,11 @@ public class MusicCommands extends CommandExecutor {
             return;
 
         }
-        if (bot.getClient().getConnectedVoiceChannels().size() == 0) { //Make sure to join the voice event.getChannel() before trying to play
-            if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) //If the user is in a voice event.getChannel()
+        if (bot.getClient().getConnectedVoiceChannels().size() == 0) { //Make sure to join the voice channel before trying to play
+            if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) //If the user is in a voice channel
                 bot.joinVoiceChannel(event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()).getChannel());
             else
-                bot.joinVoiceChannel(event.getChannel().getGuild().getVoiceChannels().get(0)); //If the user isn't connected to a voice event.getChannel(), join the (presumably) lobby
+                bot.joinVoiceChannel(event.getChannel().getGuild().getVoiceChannels().get(0)); //If the user isn't connected to a voice channel, join the (presumably) lobby
         }
         if (isURL(event.getArgs()[0]) != null) { //The user provided a direct youtube link. We can grab the id from that: no need to search
             audioManager.queueYoutube(event.getChannel(), event.getArgs()[0], music.getYoutubeWrapper().getVideoTitle(YoutubeWrapper.getIdFromUrl(event.getArgs()[0])));
@@ -80,6 +85,21 @@ public class MusicCommands extends CommandExecutor {
         }
 
 
+    }
+
+    @Command(label = "bring", description = "Brings the bot to the user's current voice channel")
+    public void bring(CommandEvent event) {
+        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
+        if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) //If the user is in a voice channel
+            bot.joinVoiceChannel(event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()).getChannel());
+        else
+            bot.sendChannelMessage("You are not current in a voice channel", event.getChannel());
+    }
+
+    @Command(label = "rewind", description = "Rewinds the current song to the beginning")
+    public void rewind(CommandEvent event) {
+        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
+        audioManager.setPosition(event.getGuild(), 0);
     }
 
     @Command(label = "unpause", description = "Unpause the music")
