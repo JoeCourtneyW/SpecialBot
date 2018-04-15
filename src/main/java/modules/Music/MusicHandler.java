@@ -51,8 +51,10 @@ public class MusicHandler {
 
     @EventSubscriber
     public void onVolume(VolumeChangeEvent event) {
-        bot.sendChannelMessage("Set volume to **" + (int) (event.getNewValue() * 100) + "%**.",
-                music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
+        if(music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()) != null) {
+            bot.sendChannelMessage("Set volume to **" + (int) (event.getNewValue() * 100) + "%**.",
+                    music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
+        }
     }
 
     @EventSubscriber
