@@ -23,13 +23,14 @@ public class MusicHandler {
     @EventSubscriber
     public void onTrackQueue(final TrackQueueEvent event) {
         final IGuild guild = event.getPlayer().getGuild();
-        if (music.getAudioManager().getAudioPlayer(guild).getCurrentTrack().getMetadata().get("title")
-                .equals(event.getTrack().getMetadata().get("title")))
-            return;
+
 
         new Timer().schedule( //Have to delay this track queueing to wait for the track data to be set properly
                 new TimerTask() {
                     public void run() {
+                        if (music.getAudioManager().getAudioPlayer(guild).getCurrentTrack().getMetadata().get("title")
+                                .equals(event.getTrack().getMetadata().get("title")))
+                            return;
                         bot.sendChannelMessage("Added **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "** to the queue.",
                                 music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
                     }

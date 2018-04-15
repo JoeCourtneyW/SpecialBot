@@ -13,7 +13,6 @@ import java.util.HashMap;
 
 public class CommandsHandler {
     private SpecialBot bot;
-    private String PREFIX = "."; //TODO: Make this guild specific
     private HashMap<Command, Method> commands = new HashMap<>();
 
     public CommandsHandler(SpecialBot bot) {
@@ -28,17 +27,20 @@ public class CommandsHandler {
 
     @EventSubscriber
     public void handleCommands(MessageReceivedEvent event) {
+        String prefix = bot.getGuildOptions(event.getGuild()).PREFIX;
         IMessage message = event.getMessage();
-        if (!message.getContent().startsWith(PREFIX))
+
+        if (!message.getContent().startsWith(prefix))
             return;
-        if (message.getContent().equalsIgnoreCase(PREFIX)) {
-            bot.sendChannelMessage("Type '" + PREFIX + "help' to show a list of commands",
+
+        if (message.getContent().equalsIgnoreCase(prefix)) {
+            bot.sendChannelMessage("Type '" + prefix + "help' to show a list of commands",
                     message.getChannel());
             return;
         }
         String[] split = message.getContent().split(" ");
 
-        String commandLabel = split[0].substring(PREFIX.length());
+        String commandLabel = split[0].substring(prefix.length());
         String[] args = split.length > 1 ? Arrays.copyOfRange(split, 1, split.length) : new String[0];
 
         for (Command ca : commands.keySet()) {
@@ -50,11 +52,11 @@ public class CommandsHandler {
                         CommandExecutor declaringClassInstance = (CommandExecutor) commandMethod.getDeclaringClass()
                                 .getConstructor(SpecialBot.class).newInstance(bot); //Creates new instance of commandexecutor class with required constructor
                         commandMethod.invoke(declaringClassInstance, new CommandEvent(ca,//Invokes command method with CommandEvent arg
-                                        event.getGuild(),
-                                        event.getChannel(),
-                                        event.getAuthor(),
-                                        event.getMessage(),
-                                        commandLabel, args));
+                                event.getGuild(),
+                                event.getChannel(),
+                                event.getAuthor(),
+                                event.getMessage(),
+                                commandLabel, args));
                     } catch (Exception e) {
                         bot.sendChannelMessage("**An error occured,** *Contact an administrator*",
                                 message.getChannel());
@@ -67,7 +69,7 @@ public class CommandsHandler {
             }
 
         }
-        bot.sendChannelMessage("Type '" + PREFIX + "help' to show a list of commands",
+        bot.sendChannelMessage("Type '" + prefix + "help' to show a list of commands",
                 message.getChannel());
     }
 }

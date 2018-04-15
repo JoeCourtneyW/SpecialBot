@@ -1,6 +1,7 @@
 package main;
 
 import main.Commands.CommandsHandler;
+import main.JsonObjects.Credentials;
 import main.JsonObjects.GuildOptions;
 import modules.SpecialModule;
 import sx.blah.discord.api.IDiscordClient;
@@ -166,7 +167,8 @@ public class SpecialBot {
             if (!existanceCheck.exists()) {
                 try {
                     existanceCheck.createNewFile();
-                    GuildOptions newGuild = new GuildOptions(guild.getStringID());
+                    GuildOptions newGuild = new GuildOptions();
+                    newGuild.GUILD_ID = guild.getStringID();
                     JsonUtil.updateJsonFile(existanceCheck, newGuild);
                 } catch (IOException e) {
                     LoggerUtil.CRITICAL("Failed to create new guild file while setting up guild options");
@@ -182,6 +184,9 @@ public class SpecialBot {
 
     public GuildOptions getGuildOptions(IGuild guild) {
         return (GuildOptions) JsonUtil.getJavaObject(new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
+    }
 
+    private static Credentials loadCredentials(File credentialsFile) {
+        return (Credentials) JsonUtil.getJavaObject(credentialsFile, Credentials.class);
     }
 }

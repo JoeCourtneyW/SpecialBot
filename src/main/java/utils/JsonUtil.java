@@ -35,6 +35,7 @@ public class JsonUtil {
             return new ObjectMapper().readValue(jsonFile, javaClass);
         } catch (IOException e) {
             LoggerUtil.CRITICAL("Failed to load json file: " + jsonFile.getAbsolutePath());
+            e.printStackTrace();
             return null;
         }
     }
