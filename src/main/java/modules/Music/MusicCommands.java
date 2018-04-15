@@ -112,7 +112,7 @@ public class MusicCommands extends CommandExecutor {
         }
         audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
         try {
-            audioManager.setVolume(event.getChannel().getGuild(), Integer.parseInt(event.getArgs()[1]));
+            audioManager.setVolume(event.getChannel().getGuild(), Integer.parseInt(event.getArgs()[0]));
         } catch (NumberFormatException e) {
             bot.sendChannelMessage("Invalid Volume Percentage, Ex: 100", event.getChannel());
             return;
