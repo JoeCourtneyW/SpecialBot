@@ -1,6 +1,7 @@
 package modules.TempMembership;
 
-import sx.blah.discord.api.IDiscordClient;
+import main.JsonObjects.GuildOptions;
+import main.SpecialBot;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import utils.LoggerUtil;
@@ -10,10 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MembershipTimer extends Thread {
-    private IDiscordClient client;
+    private SpecialBot bot;
 
-    public MembershipTimer(IDiscordClient client) {
-        this.client = client;
+    public MembershipTimer(SpecialBot bot) {
+        this.bot = bot;
     }
 
     public void start() {
@@ -30,12 +31,18 @@ public class MembershipTimer extends Thread {
             String hour = dateFormat.format(now);
             if (Integer.valueOf(hour) == 6) {
                 //It's part of the 6AM hour, start kicking members who have overstayed their welcome
-                IGuild guild = client.getGuilds().get(0);
-                for (IUser user : guild.getUsers()) {
-                    if (user.hasRole(guild.getRolesByName("rando").get(0))) { //they are a rando
-                        LoggerUtil.INFO("Rando found, removing from the server");
-                        guild.kickUser(user, "You have overstayed your welcome at The Special Church");
-                        //TODO: Try to use IUser#getCreationDate to see if that shows when they joined the guild
+                for (IGuild guild : bot.getClient().getGuilds()) {
+                    GuildOptions guildOptions = bot.getGuildOptions(guild);
+                    if (guildOptions.AUTO_KICK) {
+                        for (IUser user : guild.getUsers()) {
+                            if (!guildOptions.DEFAULT_ROLE.isEmpty()) {
+                                if (user.hasRole(guild.getRoleByID(Long.parseLong(guildOptions.DEFAULT_ROLE)))) { //they are still default role
+                                    LoggerUtil.INFO("Default role found, removing from the server");
+                                    guild.kickUser(user, "You have overstayed your welcome");
+                                    //TODO: Try to use IUser#getCreationDate to see if that shows when they joined the guild
+                                }
+                            }
+                        }
                     }
                 }
             }

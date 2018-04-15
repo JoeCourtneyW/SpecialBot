@@ -6,23 +6,22 @@ import modules.SpecialModule;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TempMembership extends SpecialModule{
+public class TempMembership extends SpecialModule {
     private String name = "Temporary Membership";
-    private String version = "1.0";
+    private String version = "1.1";
 
     private MembershipTimer timer;
     private ExecutorService membershipThread;
 
-    public TempMembership(SpecialBot bot){
+    public TempMembership(SpecialBot bot) {
         super(bot);
     }
 
     public boolean enable() {
-        this.timer = new MembershipTimer(bot.getClient());
+        this.timer = new MembershipTimer(bot);
         membershipThread = Executors.newFixedThreadPool(1);
-        membershipThread.submit(() -> {
-            timer.start();
-        });
+        membershipThread.submit(() ->
+                timer.start());
         return true;
     }
 

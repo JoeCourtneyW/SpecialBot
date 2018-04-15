@@ -3,15 +3,14 @@ package modules.Steam;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import main.Commands.Command;
+import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
 import main.SpecialBot;
 import org.simmetrics.StringMetric;
 import org.simmetrics.builders.StringMetricBuilder;
-import org.simmetrics.metrics.*;
+import org.simmetrics.metrics.SimonWhite;
 import org.simmetrics.simplifiers.Simplifiers;
 import org.simmetrics.tokenizers.Tokenizers;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.EmbedBuilder;
 import utils.LoggerUtil;
 
@@ -19,38 +18,38 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.StringJoiner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CommandSearch extends CommandExecutor {
     private static SpecialBot bot;
-    private static StringMetric overlap_block;
+    private StringMetric searchMetric;
 
     public CommandSearch(SpecialBot bot) {
         super(bot);
         CommandSearch.bot = bot;
-        overlap_block = StringMetricBuilder.with(new OverlapCoefficient<>())
+        searchMetric = StringMetricBuilder.with(new SimonWhite<>())
                 .simplify(Simplifiers.toLowerCase())
-                .simplify(Simplifiers.removeNonWord())
                 .tokenize(Tokenizers.whitespace())
                 .build();
     }
 
     @Command(label = "search")
-    public void onSearch(IMessage message) {
-        String[] args = message.getContent().split(" ");
-        IChannel channel = message.getChannel();
+    public void onSearch(CommandEvent event) {
 
         String query;
-        if (args.length >= 2) {
+        if (event.getArgs().length >= 1) {
             StringJoiner searchQuery = new StringJoiner(" ");
-            for (int i = 1; i < args.length; i++) {
-                searchQuery.add(args[i]);
+            for (String arg : event.getArgs()) {
+                searchQuery.add(arg);
             }
             query = searchQuery.toString();
         } else {
-            bot.sendChannelMessage("You must enter a search term", channel);
+            bot.sendChannelMessage("You must enter a search term", event.getChannel());
             return;
         }
-        bot.getAsyncExecutor().submit(() -> {
+        ExecutorService asyncSearch = Executors.newFixedThreadPool(1);
+        asyncSearch.submit(() -> {
             JsonNode game = searchForGame(query);
 
             String appid = game.get("appid").asText();
@@ -72,7 +71,7 @@ public class CommandSearch extends CommandExecutor {
             }
             embed.appendField("Buy Now", "http://store.steampowered.com/app/" + appid + "/", false);
             embed.withUrl("http://store.steampowered.com/app/" + appid + "/");
-            bot.sendEmbed(embed.build(), channel);
+            bot.sendEmbed(embed.build(), event.getChannel());
         });
     }
 
@@ -81,10 +80,6 @@ public class CommandSearch extends CommandExecutor {
      * @return The appid that matches closest to the given query
      */
     private JsonNode searchForGame(String query) {
-        StringMetric metric = StringMetricBuilder.with(new SimonWhite<>())
-                .simplify(Simplifiers.toLowerCase())
-                .tokenize(Tokenizers.whitespace())
-                .build();
         InputStream gameListStream = getStreamFromUrl("http://api.steampowered.com/ISteamApps/GetAppList/v0002/");
         JsonNode root = getRootNode(gameListStream).get("applist");
 
@@ -96,13 +91,13 @@ public class CommandSearch extends CommandExecutor {
             if (query.equalsIgnoreCase(game.get("name").asText())) {
                 return game;
             }
-            similarity = metric.compare(query, game.get("name").asText());
+            similarity = searchMetric.compare(query, game.get("name").asText());
             System.out.println(game.get("name") + ": " + similarity);
             if (similarity > bestSimilarity) {
                 bestResult = game;
                 bestSimilarity = similarity;
             } else if (similarity == bestSimilarity) {
-                if(bestResult == null)
+                if (bestResult == null)
                     continue;
                 if (game.get("name").asText().length() < bestResult.get("name").asText().length()) {
                     bestResult = game;

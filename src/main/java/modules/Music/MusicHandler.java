@@ -1,12 +1,8 @@
 package modules.Music;
 
 import main.SpecialBot;
-import modules.SpecialModule;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.audio.events.*;
 
 import java.util.Timer;
@@ -31,13 +27,13 @@ public class MusicHandler {
                 .equals(event.getTrack().getMetadata().get("title")))
             return;
 
-        new Timer().schedule( //waitUntilTrackDataIsSet
+        new Timer().schedule( //Have to delay this track queueing to wait for the track data to be set properly
                 new TimerTask() {
                     public void run() {
                         bot.sendChannelMessage("Added **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "** to the queue.",
                                 music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
                     }
-                }, 50);
+                }, 200);
     }
 
     @EventSubscriber
@@ -49,7 +45,7 @@ public class MusicHandler {
                         bot.sendChannelMessage("Now playing **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "**.",
                                 music.getAudioManager().getLastChannelControlledFrom(guild));
                     }
-                }, 50);
+                }, 200);
     }
 
     @EventSubscriber

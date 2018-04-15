@@ -1,45 +1,45 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>SpecialBot</groupId>
-	<artifactId>SpecialBot</artifactId>
-	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <groupId>SpecialBot</groupId>
+    <artifactId>SpecialBot</artifactId>
+    <version>1.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<name>SpecialBot</name> <!-- Actual project name -->
-	<url>http://maven.apache.org</url>
+    <name>SpecialBot</name> <!-- Actual project name -->
+    <url>http://maven.apache.org</url>
 
-	<properties> <!-- Sets the char set for the project -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties> <!-- Sets the char set for the project -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<profiles> <!-- Creates alternate build directory, specifically for the droplet host -->
-		<profile>
-			<id>droplet_output_dir</id>
-			<build>
-				<directory>/home/specialbot/SpecialBot-build</directory>
-			</build>
-		</profile>
-	</profiles>
+    <profiles> <!-- Creates alternate build directory, specifically for the droplet host -->
+        <profile>
+            <id>droplet_output_dir</id>
+            <build>
+                <directory>/home/specialbot/SpecialBot-build</directory>
+            </build>
+        </profile>
+    </profiles>
 
-	<repositories>
-		<repository> <!-- This repo fixes issues with transitive dependencies -->
-			<id>jcenter</id>
-			<url>http://jcenter.bintray.com</url>
-		</repository>
-		<repository> <!-- This repo is for Discord4J -->
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository> <!-- This repo fixes issues with transitive dependencies -->
+            <id>jcenter</id>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
+        <repository> <!-- This repo is for Discord4J -->
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
-	<dependencies> <!-- All the dependencies required for the project to run -->
-		<dependency>
-			<groupId>com.github.austinv11</groupId>
-			<artifactId>Discord4j</artifactId>
-			<version>2.10.0</version>
-		</dependency>
+    <dependencies> <!-- All the dependencies required for the project to run -->
+        <dependency>
+            <groupId>com.github.austinv11</groupId>
+            <artifactId>Discord4j</artifactId>
+            <version>2.10.0</version>
+        </dependency>
         <dependency>
             <groupId>com.github.mpkorstanje</groupId>
             <artifactId>simmetrics-core</artifactId>
@@ -47,68 +47,77 @@
         </dependency>
 
         <dependency>
-			<groupId>com.google.api-client</groupId>
-			<artifactId>google-api-client</artifactId>
-			<version>1.22.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.apis</groupId>
-			<artifactId>google-api-services-youtube</artifactId>
-			<version>v3-rev182-1.22.0</version>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.39</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.9</version>
-		</dependency>
-		<dependency>
-			<groupId>net.dean.jraw</groupId>
-			<artifactId>JRAW</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-	</dependencies>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>1.22.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-youtube</artifactId>
+            <version>v3-rev182-1.22.0</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.39</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.9</version>
+        </dependency>
+        <dependency>
+            <groupId>net.dean.jraw</groupId>
+            <artifactId>JRAW</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>  <!-- Plugin used to compile java files into class files -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<source>1.8</source> <!-- JDK Version -->
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin> <!-- Plugin used to jar class files into a .jar file -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.2</version>
-				<configuration>
-					<finalName>SpecialBot</finalName>  <!-- Changes the final name of the actual .jar file (Makes it constant so script knows -->
-					<archive>
-						<manifestFile>src/main/resources/META_INF/MANIFEST.MF</manifestFile> <!-- Manifest file path that contains the main class path -->
-					</archive>
-				</configuration>
-			</plugin>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>  <!-- Plugin used to compile java files into class files -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.8</source> <!-- JDK Version -->
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
 
-			<plugin> <!-- Plugin used to shade dependencies into the .jar file with the source code -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.1.1</version>
-				<executions> <!-- Spooky copy-pasta in order to let this run when I run 'mvn package' -->
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin> <!-- Plugin used to jar class files into a .jar file -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <finalName>SpecialBot
+                    </finalName>  <!-- Changes the final name of the actual .jar file (Makes it constant so script knows -->
+                    <archive>
+                        <manifestFile>src/main/resources/META_INF/MANIFEST.MF
+                        </manifestFile> <!-- Manifest file path that contains the main class path -->
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin> <!-- Plugin used to shade dependencies into the .jar file with the source code -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions> <!-- Spooky copy-pasta in order to let this run when I run 'mvn package' -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -1,27 +1,27 @@
 package modules.Music;
 
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.List;
-
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
 import javafx.util.Pair;
 import main.Main;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+
 public class YoutubeWrapper {
 
     private Music music;
-    public YoutubeWrapper(Music music){
+
+    public YoutubeWrapper(Music music) {
         this.music = music;
     }
 
-    private final String API_KEY = Main.CREDENTIALS.get("GOOGLE_API_KEY").asText();
+    private final String API_KEY = Main.CREDENTIALS.GOOGLE_API_KEY;
 
-    
-    public Pair<String, String> searchForVideo(String query) throws IOException{
-    	// Define the API request for retrieving search results.
+    public Pair<String, String> searchForVideo(String query) throws IOException {
+        // Define the API request for retrieving search results.
         YouTube.Search.List search = music.getYoutube().search().list("id,snippet");
 
         search.setQ(query);
@@ -43,28 +43,31 @@ public class YoutubeWrapper {
         String title = searchResultList.get(0).getSnippet().getTitle();
         return new Pair<>(id, title);
     }
-    public String getVideoTitle(String id){
+
+    public String getVideoTitle(String id) {
         try {
             YouTube.Videos.List list = music.getYoutube().videos().list("snippet");
             list.setId(id);
             list.setKey(API_KEY);
             return list.execute().getItems().get(0).getSnippet().getTitle();
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return "";
         }
     }
-    public long getVideoDuration(String id){
+
+    public long getVideoDuration(String id) {
         try {
             YouTube.Videos.List list = music.getYoutube().videos().list("contentDetails");
             list.setId(id);
             list.setKey(API_KEY);
             return Duration.parse(list.execute().getItems().get(0).getContentDetails().getDuration()).toMillis();
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return -1;
         }
     }
+
     public static String getIdFromUrl(String url) {
         //TODO: Craft regex to determine if the url given is a youtube url
         String id;
