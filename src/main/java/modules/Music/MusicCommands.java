@@ -40,7 +40,7 @@ public class MusicCommands extends CommandExecutor {
                             .append(getReadableDuration(audioManager.getTrackPosition(track))).append("*")
                             .append(" */* ")
                             .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
-                    total += (trackDuration - track.getCurrentTrackTime());
+                    total += (trackDuration - audioManager.getTrackPosition(track).toMillis());
                 } else {
                     queueList.append((i)).append(") **").append(audioManager.getTrackTitle(track)).append("** - *")
                             .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
@@ -83,12 +83,9 @@ public class MusicCommands extends CommandExecutor {
     }
 
     @Command(label = "unpause", description = "Unpause the music")
-    public void playCommand(CommandEvent event) {
+    public void unpause(CommandEvent event) {
         audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        if (bot.getClient().getConnectedVoiceChannels().size() == 0) {
-            bot.joinVoiceChannel(event.getChannel());
-            audioManager.pauseTrack(event.getChannel().getGuild(), false);
-        }
+        audioManager.pauseTrack(event.getChannel().getGuild(), false);
     }
 
     @Command(label = "pause", description = "Pause the music")
