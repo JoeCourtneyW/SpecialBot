@@ -167,8 +167,8 @@ public class MusicCommands extends CommandExecutor {
             format.append(((int) Math.floor(duration.toMinutes())) % 60);
             format.append("m ");
         }
-        if (duration.getSeconds() % 3600 > 0) {
-            format.append(((int) Math.floor(duration.getSeconds())) % 3600);
+        if (duration.getSeconds() % 60 > 0) {
+            format.append(((int) Math.floor(duration.getSeconds())) % 60);
             format.append("s");
         }
         return format.toString();
