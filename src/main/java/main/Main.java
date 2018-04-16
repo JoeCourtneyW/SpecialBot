@@ -10,7 +10,6 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.DiscordException;
 import utils.JsonUtil;
 import utils.LoggerUtil;
@@ -36,14 +35,7 @@ public class Main {
 
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            for(IVoiceChannel channel : bot.getClient().getConnectedVoiceChannels()){
-                channel.leave();
-            }
-            bot.getClient().logout();
-            bot.getClient().getChannelByID(432603421523181568L).sendMessage("Shutting down"); //TEST CODE
-        }));
+        bot.getCommandsHandler().registerCommand(new CommandUpdate(bot));
     }
 
     private static SpecialBot login() {
