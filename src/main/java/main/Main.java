@@ -16,7 +16,6 @@ import utils.JsonUtil;
 import utils.LoggerUtil;
 
 import java.io.File;
-import java.util.Scanner;
 
 public class Main {
     public static Credentials CREDENTIALS;
@@ -38,12 +37,13 @@ public class Main {
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
 
-        Runtime.getRuntime().addShutdownHook(new CleanupThread(bot));
-
-        Scanner control = new Scanner(System.in);
-        if (control.nextLine().equalsIgnoreCase("exit")) {
-            System.exit(0);
-        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            for(IVoiceChannel channel : bot.getClient().getConnectedVoiceChannels()){
+                channel.leave();
+            }
+            bot.getClient().logout();
+            bot.getClient().getChannelByID(432603421523181568L).sendMessage("Shutting down"); //TEST CODE
+        }));
     }
 
     private static SpecialBot login() {
@@ -82,21 +82,5 @@ public class Main {
     public void onReady(ReadyEvent event) {
         bot.setupClient(CREDENTIALS.CLIENT_ID);
         activateModules();
-    }
-
-    private static class CleanupThread extends Thread {
-        private SpecialBot bot;
-
-        public CleanupThread(SpecialBot bot){
-            this.bot = bot;
-        }
-
-        public void run() {
-            for(IVoiceChannel channel : bot.getClient().getConnectedVoiceChannels()){
-                channel.leave();
-            }
-            bot.getClient().logout();
-        }
-
     }
 }
