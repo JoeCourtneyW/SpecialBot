@@ -10,6 +10,7 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.DiscordException;
 import utils.JsonUtil;
 import utils.LoggerUtil;
@@ -37,11 +38,10 @@ public class Main {
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
 
-        test_code();
+        Runtime.getRuntime().addShutdownHook(new CleanupThread(bot));
 
         Scanner control = new Scanner(System.in);
         if (control.nextLine().equalsIgnoreCase("exit")) {
-            bot.getClient().logout();
             System.exit(0);
         }
     }
@@ -84,7 +84,19 @@ public class Main {
         activateModules();
     }
 
-    private static void test_code() {
-        //Place test code in this block and it will be run on startup
+    private static class CleanupThread extends Thread {
+        private SpecialBot bot;
+
+        public CleanupThread(SpecialBot bot){
+            this.bot = bot;
+        }
+
+        public void run() {
+            for(IVoiceChannel channel : bot.getClient().getConnectedVoiceChannels()){
+                channel.leave();
+            }
+            bot.getClient().logout();
+        }
+
     }
 }
