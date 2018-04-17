@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 
 public class MusicCommands extends CommandExecutor {
     private Music music;
@@ -38,7 +39,7 @@ public class MusicCommands extends CommandExecutor {
                 if (i == 0) {
                     queueList.append("Playing: **").append(audioManager.getTrackTitle(track)).append("** - *")
                             .append(getReadableDuration(audioManager.getTrackPosition(track))).append("*")
-                            .append(" */* ")
+                            .append(" / *")
                             .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
                     total += (trackDuration - audioManager.getTrackPosition(track).toMillis());
                 } else {
@@ -61,7 +62,7 @@ public class MusicCommands extends CommandExecutor {
             else
                 bot.joinVoiceChannel(event.getChannel().getGuild().getVoiceChannels().get(0)); //If the user isn't connected to a voice channel, join the (presumably) lobby
         }
-        if (isURL(event.getArgs()[0]) != null) { //The user provided a direct youtube link. We can grab the id from that: no need to search
+        if (isURL(event.getArgs()[0]) != null && isYoutubeURL(event.getArgs()[0])) { //The user provided a direct youtube link. We can grab the id from that: no need to search
             audioManager.queueYoutube(event.getChannel(), event.getArgs()[0], music.getYoutubeWrapper().getVideoTitle(YoutubeWrapper.getIdFromUrl(event.getArgs()[0])));
         } else { //Search the youtube library and try to find the song provided
             StringJoiner query = new StringJoiner(" ");
@@ -147,7 +148,6 @@ public class MusicCommands extends CommandExecutor {
         audioManager.shuffle(event.getChannel().getGuild());
     }
 
-    //TODO: Make this the youtube regex checker as well
     private URL isURL(String url) {
         try {
             new URL(url);
@@ -155,6 +155,10 @@ public class MusicCommands extends CommandExecutor {
         } catch (MalformedURLException e) {
             return null;
         }
+    }
+
+    private boolean isYoutubeURL(String url){
+        return Pattern.matches("^(https?://)?(www\\.)?(youtube\\.com|youtu\\.?be)/.+$", url);
     }
 
     private String getReadableDuration(Duration duration) {
