@@ -4,6 +4,7 @@ import main.Commands.CommandExecutor;
 import main.SpecialBot;
 
 public abstract class SpecialModule {
+
     protected SpecialBot bot;
 
     public SpecialModule(SpecialBot bot) {

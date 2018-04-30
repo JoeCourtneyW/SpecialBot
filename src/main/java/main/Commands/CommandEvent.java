@@ -5,6 +5,8 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.StringJoiner;
+
 public class CommandEvent {
     private Command command;
     private IGuild guild;
@@ -52,5 +54,13 @@ public class CommandEvent {
     }
     public void sendNoPermission(){
         //TODO
+    }
+
+    public String getArgsAsString(int startIndex){
+        StringJoiner name = new StringJoiner(" ");
+        for (int i = startIndex; i < args.length; i++) {
+            name.add(args[i]);
+        }
+        return name.toString();
     }
 }

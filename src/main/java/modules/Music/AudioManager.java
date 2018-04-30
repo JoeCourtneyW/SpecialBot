@@ -80,7 +80,11 @@ public class AudioManager {
     }
 
     public void setPosition(IGuild guild, long position) {
-        getAudioPlayer(guild).getCurrentTrack().fastForwardTo(position);
+        if(position > getTrackPosition(getAudioPlayer(guild).getCurrentTrack()).toMillis()){
+            getAudioPlayer(guild).getCurrentTrack().fastForwardTo(position);
+        } else {
+            getAudioPlayer(guild).getCurrentTrack().rewindTo(position);
+        }
     }
 
     public void shuffle(IGuild guild) {

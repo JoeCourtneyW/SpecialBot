@@ -14,6 +14,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import java.io.File;
 
 public class Music extends SpecialModule {
+    static Music instance;
     private String name = "Music";
     private String version = "1.1";
 
@@ -26,6 +27,7 @@ public class Music extends SpecialModule {
     public Music(SpecialBot bot){
         super(bot);
         music_dir = new File(Main.DIR + File.separator + "music" + File.separator);
+        instance = this;
     }
 
     public boolean enable() {

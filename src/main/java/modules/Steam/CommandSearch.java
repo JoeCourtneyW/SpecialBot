@@ -72,6 +72,7 @@ public class CommandSearch extends CommandExecutor {
             embed.appendField("Buy Now", "http://store.steampowered.com/app/" + appid + "/", false);
             embed.withUrl("http://store.steampowered.com/app/" + appid + "/");
             bot.sendEmbed(embed.build(), event.getChannel());
+            asyncSearch.shutdown();
         });
     }
 

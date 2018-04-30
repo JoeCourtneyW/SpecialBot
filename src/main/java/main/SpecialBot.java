@@ -7,10 +7,7 @@ import modules.SpecialModule;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
 import utils.JsonUtil;
 import utils.LoggerUtil;
 
@@ -52,13 +49,13 @@ public class SpecialBot {
             LoggerUtil.CRITICAL("You need to add this bot to a server. Use the link below:");
             LoggerUtil.INFO("https://discordapp.com/api/oauth2/authorize?client_id=" + client_id + "&scope=bot");
         }
-        for(IVoiceChannel channel : client.getConnectedVoiceChannels()){
-            channel.leave();//If bot autoconnects to a channel when it logs back in, leave that channel
+        for (IVoiceChannel channel : client.getConnectedVoiceChannels()) {
+            channel.leave(); //If bot autoconnects to a channel when it logs back in, leave that channel
         }
         client.changeUsername("Special Boi");
         client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, version);
-        //Image i = Image.defaultAvatar(); //TODO
-        //INSTANCE.client.changeAvatar(i);
+        /*Image avatar = Image.forFile(new File(Main.DIR + File.separator + "dev_bot_avatar.jpg")); //TODO
+        client.changeAvatar(avatar);*/
     }
 
     public IDiscordClient getClient() {
