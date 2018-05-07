@@ -2,6 +2,7 @@ package main;
 
 import main.JsonObjects.Credentials;
 import modules.AutoRole.AutoRole;
+import modules.Miscellaneous.Miscellaneous;
 import modules.Music.Music;
 import modules.Reddit.Reddit;
 import modules.Steam.Steam;
@@ -48,6 +49,7 @@ public class Main {
         bot.addModule(new Reddit(bot));
         bot.addModule(new Steam(bot));
         bot.addModule(new Music(bot));
+        bot.addModule(new Miscellaneous(bot));
     }
 
 
