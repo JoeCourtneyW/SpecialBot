@@ -54,8 +54,13 @@ public class SpecialBot {
         }
         client.changeUsername("Special Boi");
         client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, version);
-        /*Image avatar = Image.forFile(new File(Main.DIR + File.separator + "dev_bot_avatar.jpg")); //TODO
-        client.changeAvatar(avatar);*/
+        File avatar = new File(Main.DIR + File.separator + "avatar.png");
+        if(avatar.exists()) {
+            Image img = Image.forFile(avatar);
+            client.changeAvatar(img);
+        } else {
+            LoggerUtil.WARNING("Failed to load avatar image for discord user: No avatar.png file found");
+        }
     }
 
     public IDiscordClient getClient() {

@@ -1,5 +1,6 @@
 package main.Commands;
 
+import main.SpecialBot;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -8,6 +9,7 @@ import sx.blah.discord.handle.obj.IUser;
 import java.util.StringJoiner;
 
 public class CommandEvent {
+    private SpecialBot bot;
     private Command command;
     private IGuild guild;
     private IChannel channel;
@@ -16,7 +18,8 @@ public class CommandEvent {
     private String label;
     private String[] args;
 
-    public CommandEvent(Command command, IGuild guild, IChannel channel, IUser author, IMessage message, String label, String[] args) {
+    public CommandEvent(SpecialBot bot, Command command, IGuild guild, IChannel channel, IUser author, IMessage message, String label, String[] args) {
+        this.bot = bot;
         this.command = command;
         this.guild = guild;
         this.channel = channel;
@@ -52,8 +55,8 @@ public class CommandEvent {
     public String getUsageMessage(){
         return "Usage: " + command.usage();
     }
-    public void sendNoPermission(){
-        //TODO
+    public void reply(String reply){
+        bot.sendChannelMessage(reply, channel);
     }
 
     public String getArgsAsString(int startIndex){
