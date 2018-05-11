@@ -76,6 +76,11 @@ public class Downloader {
     }
 
     public void download(Playlist.Song song) {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            LoggerUtil.DEBUG("Detected Windows, downloading through EXE...");
+            downloadThroughEXE(song);
+            return;
+        }
         if (!isDownloaded(song)) {
             downloadThreads.submit(() -> {
                 String url = "http://youtu.be/" + song.ID;
@@ -91,7 +96,7 @@ public class Downloader {
         }
     }
 
-    public void downloadThroughEXE(Playlist.Song song) {
+    private void downloadThroughEXE(Playlist.Song song) {
         if (!isDownloaded(song)) {
             String url = "http://youtu.be/" + song.ID;
             YoutubeDLRequest request = new YoutubeDLRequest(url, Music.instance.getMusicDirectory().getPath());

@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.Future;
 
 public class SpecialAudioPlayer {
 
@@ -19,6 +18,7 @@ public class SpecialAudioPlayer {
     private IGuild guild;
     private AudioPlayer audioPlayer;
     private IChannel lastChannel;
+    private long lastAction;
 
     private Playlist.Song playing;
     private Queue<Playlist.Song> songQueue;
@@ -76,43 +76,44 @@ public class SpecialAudioPlayer {
     */
 
     public void queueSong(Playlist.Song song) {
-        songQueue.offer(song);
-        Future<?> future;
-        if (!Downloader.isDownloaded(song)) {
-            Music.instance.getBot().sendChannelMessage("Downloading song...", lastChannel);
-            future = Music.instance.getDownloader().getDownloadThreads().submit(() ->
-                    Music.instance.getDownloader().downloadThroughEXE(song)
-            );
-        }
-
-        Music.instance.getMusicHandler().onQueue(guild, song);
-        if (playing == null) {
-            try {
-                next();
-            } catch (Exception e) {
-                e.printStackTrace();
+        Music.instance.getDownloader().getDownloadThreads().submit(() -> {
+            if (!Downloader.isDownloaded(song)) {
+                Music.instance.getBot().sendChannelMessage("Downloading song...", lastChannel);
+                Music.instance.getDownloader().download(song);
             }
-        }
-
+            Music.instance.getMusicHandler().onQueue(guild, song);
+            songQueue.offer(song);
+            if (playing == null) {
+                try {
+                    next();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void queuePlaylist(Playlist playlist) {
-        for (Playlist.Song song : playlist) {
-            songQueue.offer(song);
-            if (!Downloader.isDownloaded(song)) {
-                Music.instance.getDownloader().getDownloadThreads().submit(() -> {
-                    Music.instance.getDownloader().downloadThroughEXE(song);
-                });
+        Music.instance.getDownloader().getDownloadThreads().submit(() -> {
+            if(!playlist.SONGS.stream().allMatch(Downloader::isDownloaded)){ //TODO: Add counter in message that updates the amount of songs downloaded out of total
+                Music.instance.getBot().sendChannelMessage("Downloading songs, This may take a second...", lastChannel);
             }
-        }
-        Music.instance.getMusicHandler().onQueue(guild, playlist);
-        if (playing == null) {
-            try {
-                next();
-            } catch (Exception e) {
-                e.printStackTrace();
+            for (Playlist.Song song : playlist) {
+                if (!Downloader.isDownloaded(song)) {
+                    Music.instance.getDownloader().download(song);
+                }
+                songQueue.offer(song);
             }
-        }
+
+            Music.instance.getMusicHandler().onQueue(guild, playlist);
+            if (playing == null) {
+                try {
+                    next();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void next() throws IOException, UnsupportedAudioFileException {
@@ -121,7 +122,6 @@ public class SpecialAudioPlayer {
         if (songHistory.size() > limit) {
             songHistory.poll();
         }
-
         if (loopState == LoopState.OFF) { //Regular play
             if (songQueue.size() == 0) {
                 playing = null;
@@ -138,6 +138,7 @@ public class SpecialAudioPlayer {
         File songFile = new File(Music.instance.getMusicDirectory() + File.separator + playing.ID + ".mp3");
         audioPlayer.queue(songFile);
         Music.instance.getMusicHandler().onStart(guild, playing);
+        lastAction = System.currentTimeMillis();
     }
 
     public void shuffleQueue() {
@@ -176,5 +177,9 @@ public class SpecialAudioPlayer {
 
     public LoopState getLoopState() {
         return loopState;
+    }
+
+    public long getLastAction() {
+        return lastAction;
     }
 }

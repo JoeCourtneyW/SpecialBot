@@ -1,7 +1,5 @@
 package modules.Music;
 
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
@@ -10,14 +8,18 @@ import main.Main;
 import main.SpecialBot;
 import modules.SpecialModule;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IVoiceChannel;
 
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class Music extends SpecialModule {
     static Music instance;
     private String name = "Music";
-    private String version = "1.1";
+    private String version = "1.2";
 
     private YouTube youtube;
     private File music_dir;
@@ -46,6 +48,7 @@ public class Music extends SpecialModule {
             audioPlayers.put(g, new SpecialAudioPlayer(bot, g));
         }
         loadGuildOptions();
+        startTimeoutTimer();
         return true;
     }
 
@@ -57,10 +60,21 @@ public class Music extends SpecialModule {
     }
 
     private void registerYoutube() {
-        youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), new HttpRequestInitializer() {
-            public void initialize(HttpRequest request) {
+        youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(),(request) -> { }).setApplicationName("Special Bot").build();
+    }
+
+    private void startTimeoutTimer() {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            Stream<IVoiceChannel> voiceChannelStream;
+            for (IGuild guild : bot.getClient().getGuilds()) {
+                voiceChannelStream = guild.getVoiceChannels().stream();
+                if(voiceChannelStream.anyMatch(IVoiceChannel::isConnected)) {
+                    if (System.currentTimeMillis() - getAudioPlayer(guild).getLastAction() > 1000 * 60 * 30) {//If it's been 30 minutes since the last bot action
+                        voiceChannelStream.filter(IVoiceChannel::isConnected).limit(1).findFirst().orElse(null).leave(); //Hecking cool streams dude
+                    }
+                }
             }
-        }).setApplicationName("Special Bot").build();
+        }, 15, 15, TimeUnit.MINUTES);
     }
 
     public SpecialAudioPlayer getAudioPlayer(IGuild guild) {

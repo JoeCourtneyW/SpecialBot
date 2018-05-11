@@ -36,12 +36,14 @@ public class MusicHandler {
 
     //NON DISCORD4J HANDLERS
     public void onQueue(IGuild guild, Playlist playlist){
-        bot.sendChannelMessage("Added **" + playlist.NAME + "** to the queue. *(" + playlist.SONGS.size() + " songs)*",
-                music.getAudioPlayer(guild).getLastChannel());
+            bot.sendChannelMessage("Added **" + playlist.NAME + "** to the queue. *(" + playlist.SONGS.size() + " songs)*",
+                    music.getAudioPlayer(guild).getLastChannel());
     }
     public void onQueue(IGuild guild, Playlist.Song song){
-        bot.sendChannelMessage("Added **" + song.TITLE + "** to the queue.",
-                music.getAudioPlayer(guild).getLastChannel());
+        if(music.getAudioPlayer(guild).getPlaying() != null) {
+            bot.sendChannelMessage("Added **" + song.TITLE + "** to the queue.",
+                    music.getAudioPlayer(guild).getLastChannel());
+        }
     }
 
     public void onStart(IGuild guild, Playlist.Song song){
