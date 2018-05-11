@@ -82,7 +82,6 @@ public class Downloader {
             return;
         }
         if (!isDownloaded(song)) {
-            downloadThreads.submit(() -> {
                 String url = "http://youtu.be/" + song.ID;
                 try {
                     Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, music.getMusicDirectory());
@@ -92,7 +91,6 @@ public class Downloader {
                 } catch (IOException | InterruptedException e) {
                     LoggerUtil.CRITICAL("Exception while trying to download youtube url:" + url);
                 }
-            });
         }
     }
 
