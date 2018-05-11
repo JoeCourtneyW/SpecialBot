@@ -35,7 +35,7 @@ public class CommandSearch extends CommandExecutor {
     public void onSearch(CommandEvent event) {
         String query = event.getArgsAsString(0).trim();
         if (query.isEmpty()) {
-            bot.sendChannelMessage("You must enter a search term", event.getChannel());
+            event.reply("You must enter a search term");
             return;
         }
 
@@ -43,7 +43,7 @@ public class CommandSearch extends CommandExecutor {
         asyncSearch.submit(() -> {
             JsonNode game = searchForGame(query);
             if(game == null){
-                bot.sendChannelMessage("No results found", event.getChannel());
+                event.reply("No results found");
                 asyncSearch.shutdown();
                 return;
             }
@@ -76,7 +76,7 @@ public class CommandSearch extends CommandExecutor {
 
             embed.appendField("Buy Now", "http://store.steampowered.com/app/" + appid + "/", false)
                     .withUrl("http://store.steampowered.com/app/" + appid + "/");
-            bot.sendEmbed(embed.build(), event.getChannel());
+            event.reply(embed.build());
             asyncSearch.shutdown();
         });
     }

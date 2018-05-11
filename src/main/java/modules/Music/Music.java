@@ -12,6 +12,7 @@ import modules.SpecialModule;
 import sx.blah.discord.handle.obj.IGuild;
 
 import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Music extends SpecialModule {
     static Music instance;
@@ -19,12 +20,17 @@ public class Music extends SpecialModule {
     private String version = "1.1";
 
     private YouTube youtube;
-    private AudioManager audioManager;
     private File music_dir;
     private Downloader downloader;
     private YoutubeWrapper youtubeWrapper;
+    private MusicHandler musicHandler;
+    /*
+            Stores the last channel that a user typed a MusicCommand into, used to reply to users on events
+        */
+    private ConcurrentHashMap<IGuild, SpecialAudioPlayer> audioPlayers = new ConcurrentHashMap<>();
 
-    public Music(SpecialBot bot){
+
+    public Music(SpecialBot bot) {
         super(bot);
         music_dir = new File(Main.DIR + File.separator + "music" + File.separator);
         instance = this;
@@ -33,47 +39,58 @@ public class Music extends SpecialModule {
     public boolean enable() {
         registerYoutube();
         youtubeWrapper = new YoutubeWrapper(this);
-        audioManager = new AudioManager(this);
         downloader = new Downloader(this);
         registerCommands(new MusicCommands(bot)); //Make sure commands and handlers are both at the end of the enable
-        registerHandlers(new MusicHandler(bot)); //method to ensure the other classes are available to them
+        registerHandlers((musicHandler = new MusicHandler(bot))); //method to ensure the other classes are available to them
+        for (IGuild g : bot.getClient().getGuilds()) {
+            audioPlayers.put(g, new SpecialAudioPlayer(bot, g));
+        }
         loadGuildOptions();
         return true;
     }
 
-    private void loadGuildOptions(){
-        for(IGuild guild : bot.getClient().getGuilds()){
+    private void loadGuildOptions() {
+        for (IGuild guild : bot.getClient().getGuilds()) {
             GuildOptions guildOptions = bot.getGuildOptions(guild);
-            audioManager.setVolume(guild, guildOptions.BOT_VOLUME);
+            getAudioPlayer(guild).setVolume(guildOptions.BOT_VOLUME);
         }
-        //TODO: Load playlists into memory
     }
 
-    private void registerYoutube(){
+    private void registerYoutube() {
         youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), new HttpRequestInitializer() {
             public void initialize(HttpRequest request) {
             }
-        }).setApplicationName("youtube-cmdline-search-sample").build();
+        }).setApplicationName("Special Bot").build();
     }
+
+    public SpecialAudioPlayer getAudioPlayer(IGuild guild) {
+        return audioPlayers.get(guild);
+    }
+
     public SpecialBot getBot() {
         return bot;
     }
-    public YouTube getYoutube(){
+
+    public YouTube getYoutube() {
         return youtube;
     }
-    public YoutubeWrapper getYoutubeWrapper(){
+
+    public YoutubeWrapper getYoutubeWrapper() {
         return youtubeWrapper;
     }
-    public Downloader getDownloader(){
+
+    public Downloader getDownloader() {
         return downloader;
     }
-    public AudioManager getAudioManager(){
-        return audioManager;
+
+    public MusicHandler getMusicHandler() {
+        return musicHandler;
     }
 
-    public File getMusicDirectory(){
+    public File getMusicDirectory() {
         return music_dir;
     }
+
     public String getName() {
         return name;
     }

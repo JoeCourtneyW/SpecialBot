@@ -30,7 +30,7 @@ public class CommandNSFW extends CommandExecutor {
         ArrayList<Submission> images = new ArrayList<>();
         boolean multiReddit = false;
         String search = defaultSubreddit;
-        int limit = 100;
+        int limit = 50;
 
         if (event.getArgs().length == 2) {
             multiReddit = event.getArgs()[0].toLowerCase().contains("m");
@@ -46,8 +46,8 @@ public class CommandNSFW extends CommandExecutor {
                 builder = Reddit.reddit.subreddit(search).posts();
             aggregator = builder
                     .limit(limit)
-                    .sorting(SubredditSort.TOP)
-                    .timePeriod(TimePeriod.YEAR)
+                    .sorting(SubredditSort.HOT)
+                    .timePeriod(TimePeriod.DAY)
                     .build();
             for (Submission s : aggregator.next()) {
                 if (!s.isSelfPost()) {
@@ -59,16 +59,12 @@ public class CommandNSFW extends CommandExecutor {
         } else {
             listing = cache.get(search);
         }
-        int index = new Random().nextInt(listing.size());
-        Submission post = listing.get(index);
-        while (true) {
-            if (post.getDomain().contains("imgur.com") || post.getDomain().contains("i.redd.it") || post.getDomain().contains("gfycat.com")) {
-                bot.sendChannelMessage("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*" + "\n" + post.getUrl(), event.getChannel());
-                return;
-            } else {
-                index = new Random().nextInt(listing.size());
-                post = listing.get(index);
+        for (Submission post : listing) {
+            if (!(post.getDomain().contains("imgur.com") || post.getDomain().contains("i.redd.it") || post.getDomain().contains("gfycat.com"))) {
+                listing.remove(post);
             }
         }
+        Submission post = listing.get(new Random().nextInt(listing.size()));
+        event.reply("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*" + "\n" + post.getUrl());
     }
 }

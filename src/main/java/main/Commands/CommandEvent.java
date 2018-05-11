@@ -1,6 +1,7 @@
 package main.Commands;
 
 import main.SpecialBot;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -58,7 +59,9 @@ public class CommandEvent {
     public void reply(String reply){
         bot.sendChannelMessage(reply, channel);
     }
-
+    public void reply(EmbedObject reply){
+        bot.sendEmbed(reply, channel);
+    }
     public String getArgsAsString(int startIndex){
         StringJoiner name = new StringJoiner(" ");
         for (int i = startIndex; i < args.length; i++) {

@@ -1,12 +1,14 @@
 package modules.Music;
 
+import main.JsonObjects.Playlist;
 import main.SpecialBot;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.util.audio.events.*;
+import sx.blah.discord.util.audio.events.TrackFinishEvent;
+import sx.blah.discord.util.audio.events.TrackSkipEvent;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.IOException;
 
 public class MusicHandler {
     private Music music;
@@ -14,64 +16,36 @@ public class MusicHandler {
 
     public MusicHandler(SpecialBot bot) {
         this.bot = bot;
-        this.music = (Music) bot.getModule("Music");
-    }
-	/*
-	Track events
-	 */
-
-    @EventSubscriber
-    public void onTrackQueue(final TrackQueueEvent event) {
-        final IGuild guild = event.getPlayer().getGuild();
-
-
-        new Timer().schedule( //Have to delay this track queueing to wait for the track data to be set properly
-                new TimerTask() {
-                    public void run() {
-                        if (music.getAudioManager().getAudioPlayer(guild).getCurrentTrack().getMetadata().get("title")
-                                .equals(event.getTrack().getMetadata().get("title")))
-                            return;
-                        bot.sendChannelMessage("Added **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "** to the queue.",
-                                music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
-                    }
-                }, 200);
+        this.music = Music.instance;
     }
 
+    /*
+        SpecialAudioPlayer handlers
+     */
     @EventSubscriber
-    public void onTrackStart(TrackStartEvent event) {
+    public void onFinishNext(TrackFinishEvent event) throws UnsupportedAudioFileException, IOException {
         IGuild guild = event.getPlayer().getGuild();
-        new Timer().schedule( //waitUntilTrackDataIsSet
-                new TimerTask() {
-                    public void run() {
-                        bot.sendChannelMessage("Now playing **" + music.getAudioManager().getTrackTitle(event.getTrack()) + "**.",
-                                music.getAudioManager().getLastChannelControlledFrom(guild));
-                    }
-                }, 200);
+        music.getAudioPlayer(guild).next();
     }
 
     @EventSubscriber
-    public void onVolume(VolumeChangeEvent event) {
-        if(music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()) != null) {
-            bot.sendChannelMessage("Set volume to **" + (int) (event.getNewValue() * 100) + "%**.",
-                    music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
-        }
+    public void onSkipNext(TrackSkipEvent event) throws UnsupportedAudioFileException, IOException  {
+        IGuild guild = event.getPlayer().getGuild();
+        music.getAudioPlayer(guild).next();
     }
 
-    @EventSubscriber
-    public void onSkip(TrackSkipEvent event) {
-        bot.sendChannelMessage("**Skipping Current Track**",
-                music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
+    //NON DISCORD4J HANDLERS
+    public void onQueue(IGuild guild, Playlist playlist){
+        bot.sendChannelMessage("Added **" + playlist.NAME + "** to the queue. *(" + playlist.SONGS.size() + " songs)*",
+                music.getAudioPlayer(guild).getLastChannel());
+    }
+    public void onQueue(IGuild guild, Playlist.Song song){
+        bot.sendChannelMessage("Added **" + song.TITLE + "** to the queue.",
+                music.getAudioPlayer(guild).getLastChannel());
     }
 
-    @EventSubscriber
-    public void onLoop(LoopStateChangeEvent event) {
-        bot.sendChannelMessage("**" + (event.getNewLoopState() ? "Now looping current song" : "No longer looping") + "**",
-                music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
-    }
-
-    @EventSubscriber
-    public void onShuffle(ShuffleEvent event) {
-        bot.sendChannelMessage("**Queue shuffled**",
-                music.getAudioManager().getLastChannelControlledFrom(event.getPlayer().getGuild()));
+    public void onStart(IGuild guild, Playlist.Song song){
+        bot.sendChannelMessage("Now playing **" + song.TITLE + "**.",
+                music.getAudioPlayer(guild).getLastChannel());
     }
 }

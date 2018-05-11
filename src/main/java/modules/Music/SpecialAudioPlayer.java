@@ -1,0 +1,180 @@
+package modules.Music;
+
+import main.JsonObjects.Playlist;
+import main.SpecialBot;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.util.audio.AudioPlayer;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.Future;
+
+public class SpecialAudioPlayer {
+
+    private SpecialBot bot;
+    private IGuild guild;
+    private AudioPlayer audioPlayer;
+    private IChannel lastChannel;
+
+    private Playlist.Song playing;
+    private Queue<Playlist.Song> songQueue;
+    private Queue<Playlist.Song> songHistory;
+    private final int limit = 25;
+
+    private LoopState loopState = LoopState.OFF;
+
+
+    public SpecialAudioPlayer(SpecialBot bot, IGuild guild) {
+        this.bot = bot;
+        this.guild = guild;
+        this.audioPlayer = AudioPlayer.getAudioPlayerForGuild(guild);
+        this.songQueue = new LinkedList<>();
+        this.songHistory = new LinkedList<>();
+    }
+
+    /*
+        AudioPlayer Extension Methods
+     */
+    public AudioPlayer getAudioPlayer() {
+        return audioPlayer;
+    }
+
+    public void pauseTrack(boolean pause) {
+        audioPlayer.setPaused(pause);
+    }
+
+    public void skipTrack() {
+        audioPlayer.skip();
+    }
+
+    public void setVolume(int percent) {
+        float volume = (float) (percent) / 100;
+        if (volume > 1.5) volume = 1.5f;
+        if (volume < 0) volume = 0f;
+        audioPlayer.setVolume(volume);
+    }
+
+    public int getVolume() {
+        float volume = audioPlayer.getVolume();
+        return (int) Math.floor(volume * 100);
+    }
+
+    public void setSongPosition(long position) {
+        if (position > audioPlayer.getCurrentTrack().getCurrentTrackTime()) {
+            audioPlayer.getCurrentTrack().fastForwardTo(position);
+        } else {
+            audioPlayer.getCurrentTrack().rewindTo(position);
+        }
+    }
+
+    /*
+        NEXT
+    */
+
+    public void queueSong(Playlist.Song song) {
+        songQueue.offer(song);
+        Future<?> future;
+        if (!Downloader.isDownloaded(song)) {
+            Music.instance.getBot().sendChannelMessage("Downloading song...", lastChannel);
+            future = Music.instance.getDownloader().getDownloadThreads().submit(() ->
+                    Music.instance.getDownloader().downloadThroughEXE(song)
+            );
+        }
+
+        Music.instance.getMusicHandler().onQueue(guild, song);
+        if (playing == null) {
+            try {
+                next();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public void queuePlaylist(Playlist playlist) {
+        for (Playlist.Song song : playlist) {
+            songQueue.offer(song);
+            if (!Downloader.isDownloaded(song)) {
+                Music.instance.getDownloader().getDownloadThreads().submit(() -> {
+                    Music.instance.getDownloader().downloadThroughEXE(song);
+                });
+            }
+        }
+        Music.instance.getMusicHandler().onQueue(guild, playlist);
+        if (playing == null) {
+            try {
+                next();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void next() throws IOException, UnsupportedAudioFileException {
+        if (playing != null)
+            songHistory.offer(playing); //Update the song history regardless of loopState
+        if (songHistory.size() > limit) {
+            songHistory.poll();
+        }
+
+        if (loopState == LoopState.OFF) { //Regular play
+            if (songQueue.size() == 0) {
+                playing = null;
+                return;
+            }
+            playing = songQueue.poll();
+        } else if (loopState == LoopState.SINGLE) {
+            //Just don't update the playing variable and reload song below
+        } else if (loopState == LoopState.ALL) {
+            if (playing != null)
+                songQueue.offer(playing); //Add the current song to the end of the queue so that it replays when we finish the other songs
+            playing = songQueue.poll();
+        }
+        File songFile = new File(Music.instance.getMusicDirectory() + File.separator + playing.ID + ".mp3");
+        audioPlayer.queue(songFile);
+        Music.instance.getMusicHandler().onStart(guild, playing);
+    }
+
+    public void shuffleQueue() {
+        List<Playlist.Song> shuffled = new ArrayList<>(songQueue);
+        Collections.shuffle(shuffled);
+        this.songQueue = new LinkedList<>(shuffled);
+    }
+
+    public Queue<Playlist.Song> getSongQueue() {
+        return songQueue;
+    }
+
+    public Playlist.Song getPlaying() {
+        return playing;
+    }
+
+    public Duration getPlayingPosition() {
+        return Duration.ofMillis(audioPlayer.getCurrentTrack().getCurrentTrackTime());
+    }
+
+    public Queue<Playlist.Song> getSongHistory() {
+        return songHistory;
+    }
+
+    public IChannel getLastChannel() {
+        return lastChannel;
+    }
+
+    public void setLastChannel(IChannel channel) {
+        this.lastChannel = channel;
+    }
+
+    public void setLoopState(LoopState loopState) {
+        this.loopState = loopState;
+    }
+
+    public LoopState getLoopState() {
+        return loopState;
+    }
+}

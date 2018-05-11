@@ -15,7 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class SpecialBot {
 
@@ -33,34 +34,19 @@ public class SpecialBot {
 
     public void setupClient(String client_id) {
         setupGuildOptions();
-        String version;
-        try {
-            Properties botProperties = new Properties();
-            botProperties.load(ClassLoader.getSystemResourceAsStream("project.properties"));
-            version = botProperties.getProperty("ver");
-        } catch (IOException e) {
-            LoggerUtil.FATAL("Failed to load bot properties file from resources");
-            e.printStackTrace();
-            System.exit(0);
-            return;
-        }
+        updatePresence();
+        setupReboot();
 
         if (client.getGuilds().size() == 0) {
             LoggerUtil.CRITICAL("You need to add this bot to a server. Use the link below:");
             LoggerUtil.INFO("https://discordapp.com/api/oauth2/authorize?client_id=" + client_id + "&scope=bot");
+            System.exit(0);
+            return;
         }
         for (IVoiceChannel channel : client.getConnectedVoiceChannels()) {
             channel.leave(); //If bot autoconnects to a channel when it logs back in, leave that channel
         }
-        client.changeUsername("Special Boi");
-        client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, version);
-        File avatar = new File(Main.DIR + File.separator + "avatar.png");
-        if(avatar.exists()) {
-            Image img = Image.forFile(avatar);
-            client.changeAvatar(img);
-        } else {
-            LoggerUtil.WARNING("Failed to load avatar image for discord user: No avatar.png file found");
-        }
+
     }
 
     public IDiscordClient getClient() {
@@ -94,6 +80,36 @@ public class SpecialBot {
             LoggerUtil.WARNING("[Module] \"" + module.getName() + "\" has failed to load.");
             return false;
         }
+    }
+
+    private void updatePresence(){
+        String version = Main.getProjectVersion();
+
+        client.changeUsername("Special Boi");
+        client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, version);
+
+        try {
+            File avatar = new File(Main.DIR + File.separator + "avatar.png");
+            if (avatar.exists()) {
+                Image img = Image.forFile(avatar);
+                client.changeAvatar(img);
+            } else {
+                LoggerUtil.WARNING("Failed to load avatar image for discord user: No avatar.png file found");
+            }
+        }catch(DiscordException e){
+            LoggerUtil.WARNING("Failed to update avatar, rate limited by discord");
+        }
+    }
+
+    private void setupReboot(){//TODO: There has to be a better way to do all of this, this seems like it isn't nearly safe enough -- PROPAGATE TO .UPDATE
+        Executors.newSingleThreadScheduledExecutor().schedule(()-> {
+            getClient().logout();
+            try {
+                Runtime.getRuntime().exec("sudo reboot");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }, 24, TimeUnit.HOURS);
     }
 
     public boolean joinVoiceChannel(IChannel channel) {
@@ -153,13 +169,7 @@ public class SpecialBot {
 		MULTI_LINE_CODE_BLOCK("```");
      */
 
-    public SpecialModule getModule(String moduleName) {
-        for (SpecialModule module : getModules()) {
-            if (module.getName().equalsIgnoreCase(moduleName))
-                return module;
-        }
-        return null;
-    }
+
 
     private void setupGuildOptions() {
         GUILD_OPTIONS_DIR = Main.DIR + File.separator + "guild_options";

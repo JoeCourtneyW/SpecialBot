@@ -16,6 +16,8 @@ import utils.JsonUtil;
 import utils.LoggerUtil;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
 
 public class Main {
     public static Credentials CREDENTIALS;
@@ -36,7 +38,7 @@ public class Main {
 
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
-        bot.getCommandsHandler().registerCommand(new CommandUpdate(bot));
+        bot.getCommandsHandler().registerCommand(new CommandUpdate(bot)); //Leave the command update while the bot is still developing
     }
 
     private static SpecialBot login() {
@@ -70,6 +72,20 @@ public class Main {
      */
     private static Credentials loadCredentials(File credentialsFile) {
         return (Credentials) JsonUtil.getJavaObject(credentialsFile, Credentials.class);
+    }
+
+    public static String getProjectVersion(){
+        String version = "";
+        try {
+            Properties botProperties = new Properties();
+            botProperties.load(ClassLoader.getSystemResourceAsStream("project.properties"));
+            version = botProperties.getProperty("ver");
+        } catch (IOException e) {
+            LoggerUtil.FATAL("Failed to load bot properties file from resources");
+            e.printStackTrace();
+            System.exit(0);
+        }
+        return version;
     }
 
     @EventSubscriber

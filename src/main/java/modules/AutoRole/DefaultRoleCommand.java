@@ -18,7 +18,7 @@ public class DefaultRoleCommand extends CommandExecutor {
     public void onDefaultRole(CommandEvent event){
         List<IRole> mentions = event.getMessage().getRoleMentions();
         if(mentions.size() != 1){
-            bot.sendChannelMessage(event.getUsageMessage(), event.getChannel());
+            event.reply(event.getUsageMessage());
 
         }
         GuildOptions options = bot.getGuildOptions(event.getGuild());

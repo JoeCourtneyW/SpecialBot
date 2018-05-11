@@ -7,80 +7,91 @@ import main.Commands.CommandExecutor;
 import main.JsonObjects.GuildOptions;
 import main.JsonObjects.Playlist;
 import main.SpecialBot;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.audio.AudioPlayer;
+import utils.LoggerUtil;
+import utils.http.UrlUtil;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.StringJoiner;
-import java.util.regex.Pattern;
+import java.util.List;
 
 public class MusicCommands extends CommandExecutor {
     private Music music;
-    private AudioManager audioManager;
 
     public MusicCommands(SpecialBot bot) {
         super(bot);
         this.music = Music.instance;
-        this.audioManager = music.getAudioManager();
     }
 
     @Command(label = "queue", description = "Add a song to the song queue", alias = "play")
     public void queueCommand(CommandEvent event) {
-        music.getAudioManager().setLastChannelControlledFrom(event.getGuild(), event.getChannel());
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
         if (event.getArgs().length < 1) { //Show current queue if they aren't trying to queue a new song
             StringBuilder queueList = new StringBuilder();
-            long total = 0;
-            for (int i = 0; i < audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylistSize(); i++) {
+            long totalDuration = 0;
+            int counter = 0;
 
-                AudioPlayer.Track track = audioManager.getAudioPlayer(event.getChannel().getGuild()).getPlaylist().get(i);
-                long trackDuration = audioManager.getTrackLength(track).toMillis();
+            long trackDuration;
 
-                if (i == 0) {
-                    queueList.append("Playing: **").append(audioManager.getTrackTitle(track)).append("** - *")
-                            .append(getReadableDuration(audioManager.getTrackPosition(track))).append("*")
-                            .append(" / *")
-                            .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
-                    total += (trackDuration - audioManager.getTrackPosition(track).toMillis());
-                } else {
-                    queueList.append((i)).append(") **").append(audioManager.getTrackTitle(track)).append("** - *")
-                            .append(getReadableDuration(audioManager.getTrackLength(track))).append("*\n");
-                    total += trackDuration;
-                }
+            Playlist.Song playing = music.getAudioPlayer(event.getGuild()).getPlaying();
+            if (playing != null) {
+
+                trackDuration = playing.DURATION;
+                queueList.append("Playing: **").append(playing.TITLE).append("** - *")
+                        .append(getReadableDuration(music.getAudioPlayer(event.getGuild()).getPlayingPosition())).append("*")
+                        .append(" / *")
+                        .append(getReadableDuration(Duration.ofMillis(playing.DURATION))).append("*\n");
+
+                totalDuration += (trackDuration - music.getAudioPlayer(event.getGuild()).getPlayingPosition().toMillis());
             }
-            queueList.append("Total Queue Length: ***").append(getReadableDuration(Duration.ofMillis(total))).append("***");
-            if (total > 0)
-                bot.sendChannelMessage(queueList.toString(), event.getChannel());
+            for (Playlist.Song song : music.getAudioPlayer(event.getChannel().getGuild()).getSongQueue()) {
+                counter++;
+
+                trackDuration = song.DURATION;
+                queueList.append((counter)).append(") **").append(song.TITLE).append("** - *")
+                        .append(getReadableDuration(Duration.ofMillis(song.DURATION))).append("*\n");
+                totalDuration += trackDuration;
+            }
+
+            queueList.append("Total Queue Length: ***").append(getReadableDuration(Duration.ofMillis(totalDuration))).append("***");
+
+            if (totalDuration > 0)
+                event.reply(queueList.toString());
             else
-                bot.sendChannelMessage("The queue is empty!", event.getChannel());
+                event.reply("*The queue is empty!*");
             return;
 
         }
-        if (bot.getClient().getConnectedVoiceChannels().size() == 0) { //Make sure to join the voice channel before trying to play
-            if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) //If the user is in a voice channel
-                bot.joinVoiceChannel(event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()).getChannel());
-            else
-                bot.joinVoiceChannel(event.getChannel().getGuild().getVoiceChannels().get(0)); //If the user isn't connected to a voice channel, join the (presumably) lobby
-        }
-        if (isURL(event.getArgs()[0]) != null && isYoutubeURL(event.getArgs()[0])) { //The user provided a direct youtube link. We can grab the id from that: no need to search
-            audioManager.queueYoutube(event.getChannel(), event.getArgs()[0], music.getYoutubeWrapper().getVideoTitle(YoutubeWrapper.getIdFromUrl(event.getArgs()[0])));
-        } else { //Search the youtube library and try to find the song provided
-            StringJoiner query = new StringJoiner(" ");
-            for (String word : event.getArgs()) {
-                query.add(word);
-            }
-            Pair<String, String> video;
-            try {
-                video = music.getYoutubeWrapper().searchForVideo(query.toString());
-            } catch (IOException e) {
-                bot.sendChannelMessage("An internal error occured while trying to search YouTube with the given query. Contact an administrator", event.getChannel());
+
+        joinVoiceChannel(event.getGuild(), event.getAuthor());
+
+        if (UrlUtil.isUrl(event.getArgs()[0]) && UrlUtil.isYoutubeURL(event.getArgs()[0])) { //The user provided a direct youtube link. We can grab the id from that: no need to search
+            String id = YoutubeWrapper.getIdFromUrl(event.getArgs()[0]);
+            String title = music.getYoutubeWrapper().getVideoTitle(id);
+            long duration = music.getYoutubeWrapper().getVideoDuration(id);
+            if (duration > 1000 * 60 * 10) {
+                event.reply("*That video is too long to play! Videos must be under 10 minutes*");
                 return;
             }
-            String url = "https://www.youtube.com/watch?v=" + video.getKey();
-            audioManager.queueYoutube(event.getChannel(), url, video.getValue());
+            music.getAudioPlayer(event.getGuild()).queueSong(new Playlist.Song(id, title, duration));
+        } else { //Search the youtube library and try to find the song provided
+            String query = event.getArgsAsString(0);
+            Pair<String, String> video;
+            try {
+                video = music.getYoutubeWrapper().searchForVideo(query);
+            } catch (IOException e) {
+                event.reply("*An internal error occured while trying to search YouTube with the given query. Contact an administrator*");
+                return;
+            }
+            long duration = music.getYoutubeWrapper().getVideoDuration(video.getKey());
+            if (duration > 1000 * 60 * 10) {
+                event.reply("*That video is too long to play! Videos must be under 10 minutes*");
+                return;
+            }
+            music.getAudioPlayer(event.getGuild()).queueSong(new Playlist.Song(video.getKey(), video.getValue(), duration));
         }
 
 
@@ -88,81 +99,102 @@ public class MusicCommands extends CommandExecutor {
 
     @Command(label = "bring", description = "Brings the bot to the user's current voice channel")
     public void bring(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) //If the user is in a voice channel
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) { //If the user is in a voice channel
             bot.joinVoiceChannel(event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()).getChannel());
-        else
-            bot.sendChannelMessage("You are not current in a voice channel", event.getChannel());
+            event.reply("**Joining Voice Channel*");
+        } else {
+            event.reply("*You are not currently in a voice channel*");
+        }
     }
 
     @Command(label = "rewind", description = "Rewinds the current song to the beginning")
     public void rewind(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        audioManager.setPosition(event.getGuild(), 0);
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        music.getAudioPlayer(event.getGuild()).setSongPosition(0);
+        event.reply("**Restarting Song...**");
     }
 
     @Command(label = "unpause", description = "Unpause the music")
     public void unpause(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        audioManager.pauseTrack(event.getChannel().getGuild(), false);
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        music.getAudioPlayer(event.getGuild()).pauseTrack(false);
+        event.reply("**Music Unpaused**");
     }
 
     @Command(label = "pause", description = "Pause the music")
     public void pauseCommand(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        audioManager.pauseTrack(event.getChannel().getGuild(), true);
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        music.getAudioPlayer(event.getGuild()).pauseTrack(true);
+        event.reply("**Music Paused**");
     }
 
     @Command(label = "skip", description = "Skip the current song")
     public void skipCommand(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        audioManager.skipTrack(event.getChannel().getGuild());
-        audioManager.pauseTrack(event.getChannel().getGuild(), false);
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        music.getAudioPlayer(event.getGuild()).skipTrack();
+        music.getAudioPlayer(event.getGuild()).pauseTrack(false);
+        event.reply("**Skipping Song...**");
     }
 
     @Command(label = "volume", description = "Change the volume of the client")
     public void volumeCommand(CommandEvent event) {
         if (event.getArgs().length == 0) {
-            bot.sendChannelMessage("Current Volume: " + audioManager.getVolume(event.getGuild()) + "%", event.getChannel());
+            event.reply("**Current Volume: " + music.getAudioPlayer(event.getGuild()).getVolume() + "%**");
             return;
         }
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
         try {
-            audioManager.setVolume(event.getChannel().getGuild(), Integer.parseInt(event.getArgs()[0]));
+            music.getAudioPlayer(event.getGuild()).setVolume(Integer.parseInt(event.getArgs()[0]));
         } catch (NumberFormatException e) {
-            bot.sendChannelMessage("Invalid Volume Percentage, Ex: 100", event.getChannel());
+            event.reply("Invalid Volume Percentage, Ex: 100");
             return;
         }
         GuildOptions options = bot.getGuildOptions(event.getGuild());
-        options.BOT_VOLUME = audioManager.getVolume(event.getGuild());
+        options.BOT_VOLUME = music.getAudioPlayer(event.getGuild()).getVolume();
         bot.updateGuildOptions(options);
+        event.reply("Set volume to **" + options.BOT_VOLUME + "%**.");
     }
 
     @Command(label = "loop", description = "Toggle the loop state of the client")
     public void loopCommand(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        audioManager.setLooping(event.getChannel().getGuild(), !audioManager.isLooping(event.getChannel().getGuild()));
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        switch (music.getAudioPlayer(event.getGuild()).getLoopState()) {
+            case OFF:
+                music.getAudioPlayer(event.getGuild()).setLoopState(LoopState.SINGLE);
+                event.reply("**Now looping current song**");
+                break;
+            case SINGLE:
+                music.getAudioPlayer(event.getGuild()).setLoopState(LoopState.ALL);
+                event.reply("**Now looping all songs in the queue**");
+                break;
+            case ALL:
+                music.getAudioPlayer(event.getGuild()).setLoopState(LoopState.OFF);
+                event.reply("**No longer looping**");
+                break;
+        }
     }
 
     @Command(label = "shuffle", description = "Shuffle the current queue")
     public void shuffleCommand(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
-        audioManager.shuffle(event.getChannel().getGuild());
+        music.getAudioPlayer(event.getGuild()).shuffleQueue();
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        event.reply("**Shuffled queue**");
     }
 
     @Command(label = "playlist", description = "Manage the guild's playlists")
     public void playlistCommand(CommandEvent event) {
-        audioManager.setLastChannelControlledFrom(event.getChannel().getGuild(), event.getChannel());
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
         if (event.getArgs().length < 1) {
-            bot.sendChannelMessage("Enter a second argument: [create, list, show, add, remove, delete]", event.getChannel());
+            event.reply("Enter a second argument: [create, list, play, show, add, remove, delete]");
             return;
         }
+        GuildOptions options = bot.getGuildOptions(event.getGuild());
         if (event.getArgs()[0].equalsIgnoreCase("create")) { //Creates a new playlist
-            GuildOptions options = bot.getGuildOptions(event.getGuild());
             if (event.getArgs().length > 1) {
                 String name = event.getArgsAsString(1);
                 if (options.getPlaylistByName(name) != null) {
-                    bot.sendChannelMessage("A playlist with that name already exists!", event.getChannel());
+                    event.reply("A playlist with that name already exists!");
                     return;
                 }
                 Playlist playlist = new Playlist();
@@ -170,83 +202,146 @@ public class MusicCommands extends CommandExecutor {
                 playlist.SONGS = new ArrayList<>();
                 options.PLAYLISTS.add(playlist);
                 bot.updateGuildOptions(options);
-                bot.sendChannelMessage("Created a new playlist: **" + name + "**", event.getChannel());
+                event.reply("Created a new playlist: **" + name + "**");
             } else {
-                bot.sendChannelMessage("You must specify a name for the playlist", event.getChannel());
+                event.reply("*You must specify a name for the playlist*");
             }
         } else if (event.getArgs()[0].equalsIgnoreCase("list")) { //Lists all playlists on the server
-            GuildOptions options = bot.getGuildOptions(event.getGuild());
             EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.withTitle("Playlists:");
+            embedBuilder.withTitle("Playlists");
             for (Playlist playlist : options.PLAYLISTS) {
                 embedBuilder.appendField(playlist.NAME, playlist.SONGS.size() + " song(s)", true);
             }
-            bot.sendEmbed(embedBuilder.build(), event.getChannel());
+            event.reply(embedBuilder.build());
         } else if (event.getArgs()[0].equalsIgnoreCase("show")) { //Shows all songs on the given playlist
-            GuildOptions options = bot.getGuildOptions(event.getGuild());
             if (event.getArgs().length > 1) {
                 String name = event.getArgsAsString(1);
                 Playlist playlist = options.getPlaylistByName(name);
                 if (playlist == null) {
-                    bot.sendChannelMessage("No playlist with that name exists", event.getChannel());
+                    event.reply("*No playlist with that name exists*");
                     return;
                 }
                 EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.withTitle(playlist.NAME + ":");
+                int counter = 1;
+                long totalDuration = 0;
                 for (Playlist.Song song : playlist.SONGS) {
-                    embedBuilder.appendField(song.TITLE, song.DURATION + "", true);
+                    embedBuilder.appendField(counter + ") " + song.TITLE, getReadableDuration(Duration.ofMillis(song.DURATION)), true);
+                    counter++;
+                    totalDuration += song.DURATION;
                 }
-                bot.sendEmbed(embedBuilder.build(), event.getChannel());
+                embedBuilder.withTitle(playlist.NAME + " (" + getReadableDuration(Duration.ofMillis(totalDuration)) + ")");
+                event.reply(embedBuilder.build());
             } else {
-                bot.sendChannelMessage("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists", event.getChannel());
+                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
             }
         } else if (event.getArgs()[0].equalsIgnoreCase("add")) {
-            GuildOptions options = bot.getGuildOptions(event.getGuild());
             if (event.getArgs().length > 1) {
                 String args = event.getArgsAsString(1);
-                if(!args.contains(":")){
-                    bot.sendChannelMessage("Incorrect usage of the command", event.getChannel());
+                if (!args.contains(":")) {
+                    event.reply("Incorrect usage of the command, 'playlist add [playlist]:[song name]'");
                     return;
                 }
                 String name = args.split(":")[0];
                 String query = args.split(":")[1];
+
                 Playlist playlist = options.getPlaylistByName(name);
                 if (playlist == null) {
-                    bot.sendChannelMessage("No playlist with that name exists", event.getChannel());
+                    event.reply("No playlist with that name exists");
                     return;
                 }
+
                 Pair<String, String> video;
                 try {
                     video = music.getYoutubeWrapper().searchForVideo(query);
                 } catch (IOException e) {
-                    bot.sendChannelMessage("An internal error occured while trying to search YouTube with the given query. Contact an administrator", event.getChannel());
+                    event.reply("An internal error occured while trying to search YouTube with the given query. Contact an administrator");
                     return;
                 }
-                playlist.SONGS.add(new Playlist.Song(video.getKey(), video.getValue()));
+
+                playlist.SONGS.add(new Playlist.Song(video.getKey(), video.getValue(), music.getYoutubeWrapper().getVideoDuration(video.getKey())));
+
                 bot.updateGuildOptions(options);
-                bot.sendChannelMessage("Added **" + video.getValue() + "** to the playlist **" + name + "**", event.getChannel());
+                event.reply("Added **" + video.getValue() + "** to the playlist **" + name + "**");
 
             } else {
-                bot.sendChannelMessage("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists", event.getChannel());
+                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
             }
         } else if (event.getArgs()[0].equalsIgnoreCase("remove")) {
-
+            if (event.getArgs().length > 1) {
+                String args = event.getArgsAsString(1);
+                if (!(args.length() > 2)) {
+                    event.reply("Incorrect usage of the command, 'playlist remove [playlist] [song index]'");
+                    return;
+                }
+                String playlistName = event.getArgs()[1];
+                int songIndex;
+                try {
+                    songIndex = Integer.parseInt(event.getArgs()[2]);
+                } catch (NumberFormatException e) {
+                    event.reply("*Song index must be a integer*");
+                    return;
+                }
+                Playlist playlist = options.getPlaylistByName(playlistName);
+                if (playlist == null) {
+                    event.reply("*No playlist with that name exists*");
+                    return;
+                }
+                if (playlist.SONGS.size() < songIndex) {
+                    event.reply("*You must choose an index within the playlist size*");
+                    return;
+                }
+                Playlist.Song song = playlist.SONGS.get(songIndex);
+                playlist.SONGS.remove(songIndex - 1);
+                bot.updateGuildOptions(options);
+                event.reply("Removed **" + song.TITLE + "** from the playlist **" + playlist.NAME + "**");
+            } else {
+                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+            }
         } else if (event.getArgs()[0].equalsIgnoreCase("delete")) {
+            if (event.getArgs().length > 1) {
+                String name = event.getArgsAsString(1);
+                Playlist playlist = options.getPlaylistByName(name);
+                if (playlist == null) {
+                    event.reply("*No playlist with that name exists*");
+                    return;
+                }
+                List<Playlist> copiedList = new ArrayList<>(options.PLAYLISTS);
+                for (Playlist toDelete : copiedList)
+                    if (toDelete.NAME.equalsIgnoreCase(playlist.NAME))
+                        options.PLAYLISTS.remove(toDelete);
+                bot.updateGuildOptions(options);
+                event.reply("*You have successfully deleted* **" + playlist.NAME + "**");
+            } else {
+                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+            }
+        } else if (event.getArgs()[0].equalsIgnoreCase("play")) {
+            if (event.getArgs().length > 1) {
+                String name = event.getArgsAsString(1);
+                Playlist playlist = options.getPlaylistByName(name);
+                if (playlist == null) {
+                    event.reply("No playlist with that name exists");
+                    return;
+                }
+                joinVoiceChannel(event.getGuild(), event.getAuthor());
+                music.getAudioPlayer(event.getGuild()).queuePlaylist(playlist);
 
+            } else {
+                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+            }
         }
     }
 
-    private URL isURL(String url) {
+    public void joinVoiceChannel(IGuild guild,  IUser user){
         try {
-            new URL(url);
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            return null;
+            if (bot.getClient().getConnectedVoiceChannels().size() == 0) { //Make sure to join the voice channel before trying to play
+                if (user.getVoiceStateForGuild(guild) != null) //If the user is in a voice channel
+                    bot.joinVoiceChannel(user.getVoiceStateForGuild(guild).getChannel());
+                else
+                    bot.joinVoiceChannel(guild.getVoiceChannels().get(0)); //If the user isn't connected to a voice channel, join the (presumably) lobby
+            }
+        } catch(NullPointerException e){
+            LoggerUtil.CRITICAL("Failed to join user's voice channel");
         }
-    }
-
-    private boolean isYoutubeURL(String url) {
-        return Pattern.matches("^(https?://)?(www\\.)?(youtube\\.com|youtu\\.?be)/.+$", url);
     }
 
     private String getReadableDuration(Duration duration) {
