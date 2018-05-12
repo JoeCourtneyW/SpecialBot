@@ -1,18 +1,18 @@
-package modules.AutoRank;
+package modules.Miscellaneous;
 
 import main.SpecialBot;
 import modules.SpecialModule;
 
-public class AutoRank extends SpecialModule {
-    private String name = "AutoRank";
+public class Miscellaneous extends SpecialModule {
+    private String name = "Misc Module";
     private String version = "1.0";
 
-    public AutoRank(SpecialBot bot) {
+    public Miscellaneous(SpecialBot bot) {
         super(bot);
     }
 
     public boolean enable() {
-        registerHandlers(new AutoRankHandler(bot));
+        registerCommands(new MiscCommands(bot));
         return true;
     }
 

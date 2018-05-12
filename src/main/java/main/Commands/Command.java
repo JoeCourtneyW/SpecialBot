@@ -13,4 +13,6 @@ public  @interface Command {
 	 String description() default "Unconfigured Command";
 	 
 	 String alias() default "";
+
+	 boolean adminOnly() default false;
 }

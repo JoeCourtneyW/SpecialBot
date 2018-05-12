@@ -2,6 +2,10 @@ package utils;
 
 public class LoggerUtil {
 
+    public static void FATAL(String message){
+        PLAIN("[FATAL] " + message);
+    }
+
     public static void CRITICAL(String message){
         PLAIN("[CRITICAL] " + message);
     }

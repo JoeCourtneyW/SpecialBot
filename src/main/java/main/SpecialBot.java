@@ -1,47 +1,56 @@
 package main;
 
 import main.Commands.CommandsHandler;
+import main.JsonObjects.Credentials;
+import main.JsonObjects.GuildOptions;
 import modules.SpecialModule;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.obj.VoiceChannel;
 import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.*;
+import utils.JsonUtil;
 import utils.LoggerUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
 
 public class SpecialBot {
 
     private IDiscordClient client;
     private List<SpecialModule> modules;
     private CommandsHandler commandsHandler;
-    private ExecutorService asyncExecutor;
+    private String GUILD_OPTIONS_DIR;
 
     public SpecialBot(IDiscordClient client) {
         this.client = client;
         modules = new ArrayList<>();
-        this.asyncExecutor = Executors.newFixedThreadPool(2);
         registerCommandsHandler();
+
+    }
+
+    public void setupClient(String client_id) {
+        setupGuildOptions();
+        updatePresence();
+        setupReboot();
+
+        if (client.getGuilds().size() == 0) {
+            LoggerUtil.CRITICAL("You need to add this bot to a server. Use the link below:");
+            LoggerUtil.INFO("https://discordapp.com/api/oauth2/authorize?client_id=" + client_id + "&scope=bot");
+            System.exit(0);
+            return;
+        }
+        for (IVoiceChannel channel : client.getConnectedVoiceChannels()) {
+            channel.leave(); //If bot autoconnects to a channel when it logs back in, leave that channel
+        }
 
     }
 
     public IDiscordClient getClient() {
         return client;
-    }
-
-    public ExecutorService getAsyncExecutor() {
-        return this.asyncExecutor;
     }
 
     private void registerCommandsHandler() {
@@ -58,8 +67,9 @@ public class SpecialBot {
     }
 
     public void addModule(SpecialModule module) {
-        if (enableModule(module))
-            modules.add(module);
+        modules.add(module);
+        if (!enableModule(module))
+            modules.remove(module);
     }
 
     private boolean enableModule(SpecialModule module) {
@@ -72,22 +82,37 @@ public class SpecialBot {
         }
     }
 
-    public void setupClient(String client_id) {
-        if (client.getGuilds().size() == 0) {
-            LoggerUtil.CRITICAL("You need to add this bot to a server. Use the link below:");
-            LoggerUtil.INFO("https://discordapp.com/api/oauth2/authorize?client_id=" + client_id + "&scope=bot");
-        }
+    private void updatePresence(){
+        String version = Main.getProjectVersion();
+
+        client.changeUsername("Special Boi");
+        client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, version);
+
         try {
-            client.changeUsername("Special Boi");
-            client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, "SNAPSHOT-1.0.0");
-            //Image i = Image.defaultAvatar(); //TODO
-            //INSTANCE.client.changeAvatar(i);
-        } catch (Exception e) {
-            e.printStackTrace();
+            File avatar = new File(Main.DIR + File.separator + "avatar.png");
+            if (avatar.exists()) {
+                Image img = Image.forFile(avatar);
+                client.changeAvatar(img);
+            } else {
+                LoggerUtil.WARNING("Failed to load avatar image for discord user: No avatar.png file found");
+            }
+        }catch(DiscordException e){
+            LoggerUtil.WARNING("Failed to update avatar, rate limited by discord");
         }
     }
 
-    public boolean joinVoiceChannel(IChannel channel){
+    private void setupReboot(){//TODO: There has to be a better way to do all of this, this seems like it isn't nearly safe enough -- PROPAGATE TO .UPDATE
+        Executors.newSingleThreadScheduledExecutor().schedule(()-> {
+            getClient().logout();
+            try {
+                Runtime.getRuntime().exec("sudo reboot");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }, 24, TimeUnit.HOURS);
+    }
+
+    public boolean joinVoiceChannel(IChannel channel) {
         IVoiceChannel voiceChannel = channel.getGuild().getVoiceChannelByID(channel.getLongID()); //Convert IChannel given by user into a voice channel
         if (!voiceChannel.getModifiedPermissions(getClient().getOurUser()).contains(Permissions.VOICE_CONNECT))
             return false;
@@ -118,18 +143,6 @@ public class SpecialBot {
                 .withChannel(channel));
     }
 
-    public IMessage sendFile(String message, File image, IChannel channel) {
-        try {
-            return sendMessage(new MessageBuilder(client)
-                    .withContent(message)
-                    .withFile(image)
-                    .withChannel(channel));
-        } catch (FileNotFoundException e) {
-            LoggerUtil.CRITICAL("That file does not exist!");
-        }
-        return null;
-    }
-
     public IMessage sendEmbed(EmbedObject embed, IChannel channel) {
         return sendMessage(new MessageBuilder(client)
                 .withEmbed(embed)
@@ -155,17 +168,40 @@ public class SpecialBot {
 		CODE_BLOCK("`"),
 		MULTI_LINE_CODE_BLOCK("```");
      */
-    public boolean tryDiscordFunction(Runnable runnable) {
-        try {
-            runnable.run();
-            return true;
-        } catch (RateLimitException e) {
-            LoggerUtil.CRITICAL("Slow down! The bot is attempting actions too quickly!" + " Please wait " + e.getRetryDelay() + "ms");
-        } catch (DiscordException e) {
-            LoggerUtil.CRITICAL("Discord Exception: " + e.getErrorMessage());
-        } catch (MissingPermissionsException e) {
-            LoggerUtil.CRITICAL("The bot is missing permissions for this action" + e.getMissingPermissions().toString());
+
+
+
+    private void setupGuildOptions() {
+        GUILD_OPTIONS_DIR = Main.DIR + File.separator + "guild_options";
+        File existanceCheck = new File(GUILD_OPTIONS_DIR);
+        if (!existanceCheck.exists()) {
+            existanceCheck.mkdir();
         }
-        return false;
+        for (IGuild guild : client.getGuilds()) {
+            existanceCheck = new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json");
+            if (!existanceCheck.exists()) {
+                try {
+                    existanceCheck.createNewFile();
+                    GuildOptions newGuild = new GuildOptions();
+                    newGuild.GUILD_ID = guild.getStringID();
+                    JsonUtil.updateJsonFile(existanceCheck, newGuild);
+                } catch (IOException e) {
+                    LoggerUtil.CRITICAL("Failed to create new guild file while setting up guild options");
+                }
+            }
+        }
+    }
+
+    public void updateGuildOptions(GuildOptions guildOptions) {
+        File optionsFile = new File(GUILD_OPTIONS_DIR + File.separator + guildOptions.GUILD_ID + ".json");
+        JsonUtil.updateJsonFile(optionsFile, guildOptions);
+    }
+
+    public GuildOptions getGuildOptions(IGuild guild) {
+        return (GuildOptions) JsonUtil.getJavaObject(new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
+    }
+
+    private static Credentials loadCredentials(File credentialsFile) {
+        return (Credentials) JsonUtil.getJavaObject(credentialsFile, Credentials.class);
     }
 }
