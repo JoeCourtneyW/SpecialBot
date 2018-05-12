@@ -102,7 +102,7 @@ public class MusicCommands extends CommandExecutor {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
         if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) { //If the user is in a voice channel
             bot.joinVoiceChannel(event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()).getChannel());
-            event.reply("**Joining Voice Channel*");
+            event.reply("**Joining Voice Channel**");
         } else {
             event.reply("*You are not currently in a voice channel*");
         }

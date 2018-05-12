@@ -4,7 +4,7 @@
 
     <groupId>SpecialBot</groupId>
     <artifactId>SpecialBot</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>SpecialBot</name> <!-- Actual project name -->
