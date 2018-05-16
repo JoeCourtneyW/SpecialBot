@@ -1,8 +1,7 @@
 package modules.Reddit;
 
 import main.Main;
-import main.SpecialBot;
-import modules.SpecialModule;
+import main.SpecialModule;
 import net.dean.jraw.RedditClient;
 import net.dean.jraw.Version;
 import net.dean.jraw.http.NetworkAdapter;
@@ -11,20 +10,14 @@ import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.oauth.Credentials;
 import net.dean.jraw.oauth.OAuthHelper;
 
-public class Reddit extends SpecialModule {
+public class Reddit implements SpecialModule {
 
-    private String name = "Reddit";
-    private String version = "1.0";
+    static RedditClient reddit; //TODO: Passthrough?
 
-    public static RedditClient reddit; //TODO: Passthrough?
 
-    public Reddit(SpecialBot bot) {
-        super(bot);
-    }
-
-    public boolean enable() {
+    public boolean onLoad() {
         authenticate();
-        registerCommands(new CommandNSFW(bot));
+        bot.registerCommands(new CommandNSFW(bot));
         return true;
     }
 
@@ -49,10 +42,10 @@ public class Reddit extends SpecialModule {
     }
 
     public String getName() {
-        return name;
+        return "Reddit";
     }
 
     public String getVersion() {
-        return version;
+        return "1.0";
     }
 }

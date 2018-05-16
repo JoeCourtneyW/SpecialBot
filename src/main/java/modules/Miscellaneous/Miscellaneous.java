@@ -1,26 +1,20 @@
 package modules.Miscellaneous;
 
-import main.SpecialBot;
-import modules.SpecialModule;
+import main.SpecialModule;
 
-public class Miscellaneous extends SpecialModule {
-    private String name = "Misc Module";
-    private String version = "1.0";
+public class Miscellaneous implements SpecialModule {
 
-    public Miscellaneous(SpecialBot bot) {
-        super(bot);
-    }
 
-    public boolean enable() {
-        registerCommands(new MiscCommands(bot));
+    public boolean onLoad() {
+        bot.registerCommands(new MiscCommands(bot));
         return true;
     }
 
     public String getName() {
-        return name;
+        return "Miscellaneous";
     }
 
     public String getVersion() {
-        return version;
+        return "1.0";
     }
 }

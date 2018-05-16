@@ -6,7 +6,7 @@ import com.google.api.services.youtube.YouTube;
 import main.JsonObjects.GuildOptions;
 import main.Main;
 import main.SpecialBot;
-import modules.SpecialModule;
+import main.SpecialModule;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
@@ -16,10 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-public class Music extends SpecialModule {
+public class Music implements SpecialModule {
     static Music instance;
-    private String name = "Music";
-    private String version = "1.2";
 
     private YouTube youtube;
     private File music_dir;
@@ -31,24 +29,19 @@ public class Music extends SpecialModule {
         */
     private ConcurrentHashMap<IGuild, SpecialAudioPlayer> audioPlayers = new ConcurrentHashMap<>();
 
-
-    public Music(SpecialBot bot) {
-        super(bot);
-        music_dir = new File(Main.DIR + File.separator + "music" + File.separator);
-        instance = this;
-    }
-
-    public boolean enable() {
+    public boolean onLoad() {
         registerYoutube();
         youtubeWrapper = new YoutubeWrapper(this);
         downloader = new Downloader(this);
-        registerCommands(new MusicCommands(bot)); //Make sure commands and handlers are both at the end of the enable
-        registerHandlers((musicHandler = new MusicHandler(bot))); //method to ensure the other classes are available to them
+        bot.registerCommands(new MusicCommands(bot)); //Make sure commands and handlers are both at the end of the onLoad
+        bot.registerHandlers((musicHandler = new MusicHandler(bot))); //method to ensure the other classes are available to them
         for (IGuild g : bot.getClient().getGuilds()) {
             audioPlayers.put(g, new SpecialAudioPlayer(bot, g));
         }
         loadGuildOptions();
         startTimeoutTimer();
+        music_dir = new File(Main.DIR + File.separator + "music" + File.separator);
+        instance = this;
         return true;
     }
 
@@ -60,15 +53,16 @@ public class Music extends SpecialModule {
     }
 
     private void registerYoutube() {
-        youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(),(request) -> { }).setApplicationName("Special Bot").build();
+        youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(), (request) -> {
+        }).setApplicationName("Special Bot").build();
     }
 
-    private void startTimeoutTimer() {
+    private void startTimeoutTimer() {//TODO: Fix
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             Stream<IVoiceChannel> voiceChannelStream;
             for (IGuild guild : bot.getClient().getGuilds()) {
                 voiceChannelStream = guild.getVoiceChannels().stream();
-                if(voiceChannelStream.anyMatch(IVoiceChannel::isConnected)) {
+                if (voiceChannelStream.anyMatch(IVoiceChannel::isConnected)) {
                     if (System.currentTimeMillis() - getAudioPlayer(guild).getLastAction() > 1000 * 60 * 30) {//If it's been 30 minutes since the last bot action
                         voiceChannelStream.filter(IVoiceChannel::isConnected).limit(1).findFirst().orElse(null).leave(); //Hecking cool streams dude
                     }
@@ -106,10 +100,10 @@ public class Music extends SpecialModule {
     }
 
     public String getName() {
-        return name;
+        return "Music";
     }
 
     public String getVersion() {
-        return version;
+        return "1.2";
     }
 }

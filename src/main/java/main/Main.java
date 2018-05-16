@@ -38,7 +38,7 @@ public class Main {
 
         bot = login();
         bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
-        bot.getCommandsHandler().registerCommand(new CommandUpdate(bot)); //Leave the command update while the bot is still developing
+        bot.registerCommands(new CommandUpdate(bot)); //Leave the command update while the bot is still developing
     }
 
     private static SpecialBot login() {
@@ -46,12 +46,12 @@ public class Main {
     }
 
     private static void activateModules() {
-        bot.addModule(new AutoRole(bot));
-        bot.addModule(new TempMembership(bot));
-        bot.addModule(new Reddit(bot));
-        bot.addModule(new Steam(bot));
-        bot.addModule(new Music(bot));
-        bot.addModule(new Miscellaneous(bot));
+        bot.loadModule(new AutoRole());
+        bot.loadModule(new TempMembership());
+        bot.loadModule(new Reddit());
+        bot.loadModule(new Steam());
+        bot.loadModule(new Music());
+        bot.loadModule(new Miscellaneous());
     }
 
 

@@ -1,9 +1,9 @@
 package main;
 
+import main.Commands.CommandExecutor;
 import main.Commands.CommandsHandler;
 import main.JsonObjects.Credentials;
 import main.JsonObjects.GuildOptions;
-import modules.SpecialModule;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.*;
@@ -13,21 +13,17 @@ import utils.LoggerUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class SpecialBot {
 
     private IDiscordClient client;
-    private List<SpecialModule> modules;
     private CommandsHandler commandsHandler;
     private String GUILD_OPTIONS_DIR;
 
     public SpecialBot(IDiscordClient client) {
         this.client = client;
-        modules = new ArrayList<>();
         registerCommandsHandler();
 
     }
@@ -57,29 +53,21 @@ public class SpecialBot {
         this.commandsHandler = new CommandsHandler(this);
         getClient().getDispatcher().registerListener(commandsHandler);
     }
-
-    public CommandsHandler getCommandsHandler() {
-        return this.commandsHandler;
-    }
-
-    public List<SpecialModule> getModules() {
-        return modules;
-    }
-
-    public void addModule(SpecialModule module) {
-        modules.add(module);
-        if (!enableModule(module))
-            modules.remove(module);
-    }
-
-    private boolean enableModule(SpecialModule module) {
-        if (module.enable()) {
+    public void loadModule(SpecialModule module) {
+        if (module.onLoad()) {
             LoggerUtil.INFO("[Module] Enabled \"" + module.getName() + "\" V" + module.getVersion());
-            return true;
         } else {
             LoggerUtil.WARNING("[Module] \"" + module.getName() + "\" has failed to load.");
-            return false;
         }
+    }
+    public void registerHandlers(Object... handlers) {
+        for (Object handler : handlers)
+            client.getDispatcher().registerListener(handler);
+    }
+
+    public void registerCommands(CommandExecutor... executors) {
+        for (CommandExecutor executor : executors)
+            commandsHandler.registerCommand(executor);
     }
 
     private void updatePresence(){

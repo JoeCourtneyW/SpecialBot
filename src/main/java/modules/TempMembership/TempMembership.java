@@ -1,8 +1,7 @@
 package modules.TempMembership;
 
 import main.JsonObjects.GuildOptions;
-import main.SpecialBot;
-import modules.SpecialModule;
+import main.SpecialModule;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import utils.LoggerUtil;
@@ -12,16 +11,10 @@ import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class TempMembership extends SpecialModule {
-    private String name = "Temporary Membership";
-    private String version = "1.1";
+public class TempMembership implements SpecialModule {
 
 
-    public TempMembership(SpecialBot bot) {
-        super(bot);
-    }
-
-    public boolean enable() { //TODO: Try using guild#getUserJoinDate
+    public boolean onLoad() { //TODO: Try using guild#getUserJoinDate
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             String hour = new SimpleDateFormat("HH").format(new Date()); //Grabs the 24 hour formatted hour that it currently is
             if (Integer.valueOf(hour) == 6) {
@@ -44,10 +37,10 @@ public class TempMembership extends SpecialModule {
     }
 
     public String getName() {
-        return name;
+        return "Temporary Membership";
     }
 
     public String getVersion() {
-        return version;
+        return "1.1";
     }
 }

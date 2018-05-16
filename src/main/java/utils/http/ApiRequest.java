@@ -2,6 +2,7 @@ package utils.http;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -15,8 +16,8 @@ import java.util.Map;
 public class ApiRequest {
 
     private static HttpClient httpClient = HttpClientBuilder.create().build();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private HttpResponse response;
     private StringBuilder url;
     private Map<String, String> parameters;
     private Map<String, String> headers;
@@ -40,7 +41,7 @@ public class ApiRequest {
         return this;
     }
 
-    public ApiRequest post(String postEntity) {
+    public JsonNode post(String postEntity) {
         for (Map.Entry<String, String> param : parameters.entrySet()) {
             url.append("&").append(param.getKey()).append("=").append(param.getValue());
         }
@@ -52,15 +53,22 @@ public class ApiRequest {
             req.addHeader(header.getKey(), header.getValue());
         }
         try {
-            response = httpClient.execute(req);
+            HttpResponse httpResponse = httpClient.execute(req);
+            JsonNode content = objectMapper.readTree(httpResponse.getEntity().getContent());
+            ObjectNode response = objectMapper.createObjectNode();
+            response.set("content", content);
+            response.put("status", httpResponse.getStatusLine().getStatusCode());
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
-            response = null;
+            ObjectNode response = objectMapper.createObjectNode();
+            response.put("status", 500);
+            response.set("content", objectMapper.createObjectNode());
+            return response;
         }
-        return this;
     }
 
-    public ApiRequest get() {
+    public JsonNode get() {
         for (Map.Entry<String, String> param : parameters.entrySet()) {
             url.append("&").append(param.getKey()).append("=").append(param.getValue());
         }
@@ -69,26 +77,20 @@ public class ApiRequest {
         HttpGet req = new HttpGet(requestUrl);
         req.addHeader("Content-Type", "application/json");
         try {
-            response = httpClient.execute(req);
+            HttpResponse httpResponse = httpClient.execute(req);
+            JsonNode content = objectMapper.readTree(httpResponse.getEntity().getContent());
+            ObjectNode response = objectMapper.createObjectNode();
+            response.set("content", content);
+            response.put("status", httpResponse.getStatusLine().getStatusCode());
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
-            response = null;
+            ObjectNode response = objectMapper.createObjectNode();
+            response.put("status", 500);
+            response.set("content", objectMapper.createObjectNode());
+            return response;
         }
-        return this;
 
-    }
-
-    public HttpResponse getResponse() {
-        return response;
-    }
-
-    public JsonNode getResponseContent() {
-        try {
-            return new ObjectMapper().readTree(response.getEntity().getContent());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 }

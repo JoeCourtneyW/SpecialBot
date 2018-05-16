@@ -83,7 +83,7 @@ public class MusicCommands extends CommandExecutor {
             try {
                 video = music.getYoutubeWrapper().searchForVideo(query);
             } catch (IOException e) {
-                event.reply("*An internal error occured while trying to search YouTube with the given query. Contact an administrator*");
+                event.reply("*An internal error occurred while trying to search YouTube with the given query. Contact an administrator*");
                 return;
             }
             long duration = music.getYoutubeWrapper().getVideoDuration(video.getKey());
@@ -97,6 +97,23 @@ public class MusicCommands extends CommandExecutor {
 
     }
 
+    @Command(label="history")
+    public void history(CommandEvent event){
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+
+        StringBuilder historyList = new StringBuilder();
+        int counter = 0;
+        for (Playlist.Song song : music.getAudioPlayer(event.getChannel().getGuild()).getSongHistory()) {
+            counter++;
+            historyList.append((counter)).append(") **").append(song.TITLE).append("** - *")
+                    .append(getReadableDuration(Duration.ofMillis(song.DURATION))).append("*\n");
+        }
+        if (historyList.length() == 0)
+            event.reply(historyList.toString());
+        else
+            event.reply("*No songs have been played*");
+
+    }
     @Command(label = "bring", description = "Brings the bot to the user's current voice channel")
     public void bring(CommandEvent event) {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());

@@ -1,27 +1,87 @@
 package modules.Steam;
 
-import main.SpecialBot;
-import modules.SpecialModule;
+import com.fasterxml.jackson.databind.JsonNode;
+import main.SpecialModule;
+import org.simmetrics.StringMetric;
+import org.simmetrics.builders.StringMetricBuilder;
+import org.simmetrics.metrics.SimonWhite;
+import org.simmetrics.simplifiers.Simplifiers;
+import org.simmetrics.tokenizers.Tokenizers;
+import utils.http.ApiRequest;
 
-public class Steam extends SpecialModule{
+import javax.annotation.Nullable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-    private String name = "Steam";
-    private String version = "1.0";
+public class Steam implements SpecialModule{
 
-    public Steam(SpecialBot bot){
-        super(bot);
-    }
+    static Steam instance;
 
-    public boolean enable() {
-        registerCommands(new CommandSearch(bot));
+    static StringMetric //Build my own search metric: Match length of query to sub sections of match with low levenshteins
+            searchMetric = StringMetricBuilder.with(new SimonWhite<>())
+            .simplify(Simplifiers.toLowerCase())
+            .simplify(Simplifiers.removeAll("[^A-Za-z0-9 ]+")) //TODO: Remove regex because regices are slooooooow
+            .tokenize(Tokenizers.whitespace())
+            .build();
+    static JsonNode appList = new ApiRequest("http://api.steampowered.com")
+            .setEndpoint("/ISteamApps/GetAppList/v0002/")
+            .get().get("content").get("applist");;
+    static ExecutorService searchService = Executors.newCachedThreadPool();
+
+    public boolean onLoad() {
+        bot.registerCommands(new CommandSearch(bot), new CommandWishlist(bot));
+        instance = this;
         return true;
     }
 
     public String getName() {
-        return name;
+        return "Steam";
     }
 
     public String getVersion() {
-        return version;
+        return "1.0";
+    }
+
+    /**
+     * @param query What to look up
+     * @return The steamgame object that best matches the query
+     */
+    @Nullable
+    public static SteamGame searchForGame(String query) {
+
+        JsonNode bestResult = null;
+        float bestSimilarity = 0;
+        float similarity;
+
+        for (JsonNode game : appList.get("apps")) {
+            if (query.equalsIgnoreCase(game.get("name").asText())) {
+                bestResult = game;
+                continue;
+            }
+            similarity = searchMetric.compare(query, game.get("name").asText());
+
+            if (similarity > bestSimilarity) { //If this is more similar than the most similar so far
+                bestResult = game;
+                bestSimilarity = similarity;
+            } else if (similarity == bestSimilarity && similarity != 0) { //If the similarity is equivalent and it's not 0
+                if (game.get("name").asText().length() < bestResult.get("name").asText().length()) {
+                    bestResult = game; //If they are both very similar, take shorter result
+                }
+            }
+        }
+
+        if (bestResult == null)
+            return null;
+        return getAppDetails(bestResult.get("appid").asText());
+    }
+
+    private static SteamGame getAppDetails(String appid) {
+        JsonNode response = new ApiRequest("http://store.steampowered.com/api").setEndpoint("/appdetails/")
+                .setParameter("appids", appid)
+                .setParameter("cc", "us")
+                .setParameter("l", "en")
+                .get();
+
+        return SteamGame.buildFromAppDetails(response.get("content").get(appid).get("data"));
     }
 }

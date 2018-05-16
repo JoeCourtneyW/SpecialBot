@@ -1,5 +1,7 @@
 package main.JsonObjects;
 
+import modules.Steam.SteamGame;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +11,7 @@ public class GuildOptions {
     public String PREFIX = ".";
     public int BOT_VOLUME = 100;
     public List<Playlist> PLAYLISTS = new ArrayList<>();
+    public List<SteamGame> WISHLIST = new ArrayList<>();
     public String DEFAULT_ROLE = "";
     public boolean AUTO_KICK = false;
 
