@@ -13,19 +13,20 @@ import javax.annotation.Nullable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Steam implements SpecialModule{
+public class Steam implements SpecialModule {
 
     static Steam instance;
 
     static StringMetric //Build my own search metric: Match length of query to sub sections of match with low levenshteins
             searchMetric = StringMetricBuilder.with(new SimonWhite<>())
             .simplify(Simplifiers.toLowerCase())
-            .simplify(Simplifiers.removeAll("[^A-Za-z0-9 ]+")) //TODO: Remove regex because regices are slooooooow
+            .simplify(Simplifiers.removeNonWord())
             .tokenize(Tokenizers.whitespace())
             .build();
     static JsonNode appList = new ApiRequest("http://api.steampowered.com")
             .setEndpoint("/ISteamApps/GetAppList/v0002/")
-            .get().get("content").get("applist");;
+            .get().get("content").get("applist");
+
     static ExecutorService searchService = Executors.newCachedThreadPool();
 
     public boolean onLoad() {

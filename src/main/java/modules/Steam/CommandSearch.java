@@ -4,7 +4,6 @@ import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
 import main.SpecialBot;
-import sx.blah.discord.util.EmbedBuilder;
 
 public class CommandSearch extends CommandExecutor {
 
@@ -26,27 +25,7 @@ public class CommandSearch extends CommandExecutor {
                 event.reply("No results found");
                 return;
             }
-
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.withThumbnail(steamGame.HEADER_IMAGE)
-                    .withTitle(steamGame.NAME)
-                    .appendDesc(steamGame.DESCRIPTION);
-
-            if (!steamGame.FREE) {
-                if (steamGame.DISCOUNT_PERCENT != 0) {
-                    embed.appendField("Price", "~~$" + steamGame.INITIAL_PRICE + "~~ **$" + steamGame.FINAL_PRICE + "**", true)
-                            .appendField("Discount", "__**-" + steamGame.DISCOUNT_PERCENT + "%**__", true);
-                } else {
-                    embed.appendField("Price", "$" + steamGame.FINAL_PRICE, true);
-                }
-
-                embed.appendField("Buy Now", steamGame.steamLink(), false);
-            } else {
-                embed.appendField("Price", "**Free!**", true)
-                        .appendField("Play Now", steamGame.steamLink(), false);
-            }
-            embed.withUrl(steamGame.steamLink());
-            event.reply(embed.build());
+            event.reply(steamGame.buildEmbed());
         });
     }
 

@@ -45,15 +45,6 @@ public class Main {
         return new SpecialBot(createClient(CREDENTIALS.PERSONAL_TOKEN));
     }
 
-    private static void activateModules() {
-        bot.loadModule(new AutoRole());
-        bot.loadModule(new TempMembership());
-        bot.loadModule(new Reddit());
-        bot.loadModule(new Steam());
-        bot.loadModule(new Music());
-        bot.loadModule(new Miscellaneous());
-    }
-
 
     private static IDiscordClient createClient(String token) { // Returns a new instance of the Discord client
         ClientBuilder clientBuilder = new ClientBuilder();
@@ -66,6 +57,15 @@ public class Main {
         return null;
     }
 
+    private static void activateModules() {
+        bot.loadModule(new AutoRole());
+        bot.loadModule(new TempMembership());
+        bot.loadModule(new Reddit());
+        bot.loadModule(new Steam());
+        bot.loadModule(new Music());
+        bot.loadModule(new Miscellaneous());
+    }
+
     /**
      * @param credentialsFile the JSON file that contains the credentials
      * @return A Credentials object
@@ -74,7 +74,7 @@ public class Main {
         return (Credentials) JsonUtil.getJavaObject(credentialsFile, Credentials.class);
     }
 
-    public static String getProjectVersion(){
+    public static String getProjectVersion() {
         String version = "";
         try {
             Properties botProperties = new Properties();
@@ -92,5 +92,7 @@ public class Main {
     public void onReady(ReadyEvent event) {
         bot.setupClient(CREDENTIALS.CLIENT_ID);
         activateModules();
+        LoggerUtil.PLAIN("");
+        LoggerUtil.INFO("SpecialBot started... Listening for user commands...");
     }
 }

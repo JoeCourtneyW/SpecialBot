@@ -42,7 +42,6 @@ public class SpecialBot {
         for (IVoiceChannel channel : client.getConnectedVoiceChannels()) {
             channel.leave(); //If bot autoconnects to a channel when it logs back in, leave that channel
         }
-
     }
 
     public IDiscordClient getClient() {
