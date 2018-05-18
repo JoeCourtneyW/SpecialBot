@@ -1,5 +1,6 @@
 package main.JsonObjects;
 
+import main.GuildOptions.Modifiable;
 import modules.Steam.SteamGame;
 
 import java.util.ArrayList;
@@ -8,14 +9,18 @@ import java.util.List;
 public class GuildOptions {
 
     public String GUILD_ID;
-    public String PREFIX = ".";
-    public int BOT_VOLUME = 100;
     public List<Playlist> PLAYLISTS = new ArrayList<>();
     public List<SteamGame> WISHLIST = new ArrayList<>();
+    @Modifiable(name = "prefix")
+    public String PREFIX = ".";
+    @Modifiable(name = "volume")
+    public int BOT_VOLUME = 100;
+    @Modifiable(name = "defaultRole")
     public String DEFAULT_ROLE = "";
+    @Modifiable(name = "tempMembership")
     public boolean AUTO_KICK = false;
 
-    public Playlist getPlaylistByName(String name){
+    public Playlist getPlaylistByName(String name) {
         for (Playlist p : PLAYLISTS) {
             if (p.NAME.equalsIgnoreCase(name)) {
                 return p;
@@ -24,7 +29,7 @@ public class GuildOptions {
         return null;
     }
 
-    public String toString(){
+    public String toString() {
         return GUILD_ID;
     }
 }
