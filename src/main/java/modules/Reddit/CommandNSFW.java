@@ -63,7 +63,7 @@ public class CommandNSFW implements CommandExecutor {
                     .build();
             //If the post is not a self post, cache it
             aggregator.next().stream()
-                    .filter(Submission::isSelfPost)
+                    .filter(post -> !post.isSelfPost())
                     .filter(post -> post.getDomain().contains("imgur.com")
                             || post.getDomain().contains("i.redd.it")
                             || post.getDomain().contains("i.redditmedia.com")
