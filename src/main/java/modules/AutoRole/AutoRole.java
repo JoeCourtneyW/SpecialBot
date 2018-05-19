@@ -6,7 +6,6 @@ public class AutoRole implements SpecialModule {
 
     public boolean onLoad() {
         bot.registerHandlers(new AutoRoleHandler(bot));
-        bot.registerCommands(new DefaultRoleCommand(bot));
         return true;
     }
 

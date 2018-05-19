@@ -3,15 +3,10 @@ package modules.Steam;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
-import main.JsonObjects.GuildOptions;
-import main.SpecialBot;
+import main.GuildOptions.GuildOptions;
 import sx.blah.discord.util.EmbedBuilder;
 
-public class CommandWishlist extends CommandExecutor {
-    public CommandWishlist(SpecialBot bot) {
-        super(bot);
-    }
-
+public class CommandWishlist implements CommandExecutor {
 
     @Command(label="wishlist")
     public void wishlist(CommandEvent event){

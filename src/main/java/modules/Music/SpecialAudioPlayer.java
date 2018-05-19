@@ -1,6 +1,5 @@
 package modules.Music;
 
-import main.JsonObjects.Playlist;
 import main.SpecialBot;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;

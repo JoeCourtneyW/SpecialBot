@@ -2,8 +2,7 @@ package main;
 
 import main.Commands.CommandExecutor;
 import main.Commands.CommandsHandler;
-import main.JsonObjects.Credentials;
-import main.JsonObjects.GuildOptions;
+import main.GuildOptions.GuildOptions;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.*;

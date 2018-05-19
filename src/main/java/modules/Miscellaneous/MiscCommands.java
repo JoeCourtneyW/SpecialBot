@@ -5,14 +5,10 @@ import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
 import main.Main;
-import main.SpecialBot;
 import org.apache.http.HttpException;
 import utils.http.ApiRequest;
 
-public class MiscCommands extends CommandExecutor {
-    public MiscCommands(SpecialBot bot) {
-        super(bot);
-    }
+public class MiscCommands implements CommandExecutor {
 
     @Command(label = "quote")
     public void quoteCommand(CommandEvent event) throws HttpException {

@@ -1,6 +1,6 @@
-package main.JsonObjects;
+package main.GuildOptions;
 
-import main.GuildOptions.Modifiable;
+import modules.Music.Playlist;
 import modules.Steam.SteamGame;
 
 import java.util.ArrayList;

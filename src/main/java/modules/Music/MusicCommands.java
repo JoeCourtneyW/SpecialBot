@@ -4,9 +4,7 @@ import javafx.util.Pair;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
-import main.JsonObjects.GuildOptions;
-import main.JsonObjects.Playlist;
-import main.SpecialBot;
+import main.GuildOptions.GuildOptions;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
@@ -18,13 +16,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MusicCommands extends CommandExecutor {
-    private Music music;
-
-    public MusicCommands(SpecialBot bot) {
-        super(bot);
-        this.music = Music.instance;
-    }
+public class MusicCommands implements CommandExecutor {
+    private Music music = Music.instance;
 
     @Command(label = "queue", description = "Add a song to the song queue", alias = "play")
     public void queueCommand(CommandEvent event) {

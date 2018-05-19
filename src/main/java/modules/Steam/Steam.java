@@ -30,7 +30,7 @@ public class Steam implements SpecialModule {
     static ExecutorService searchService = Executors.newCachedThreadPool();
 
     public boolean onLoad() {
-        bot.registerCommands(new CommandSearch(bot), new CommandWishlist(bot));
+        bot.registerCommands(new CommandSearch(), new CommandWishlist());
         instance = this;
         return true;
     }

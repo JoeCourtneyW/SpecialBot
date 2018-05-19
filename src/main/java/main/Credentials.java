@@ -1,4 +1,4 @@
-package main.JsonObjects;
+package main;
 
 public class Credentials {
     public String PERSONAL_TOKEN;

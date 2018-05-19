@@ -3,7 +3,7 @@ package modules.Music;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
-import main.JsonObjects.GuildOptions;
+import main.GuildOptions.GuildOptions;
 import main.Main;
 import main.SpecialBot;
 import main.SpecialModule;
@@ -33,7 +33,7 @@ public class Music implements SpecialModule {
         registerYoutube();
         youtubeWrapper = new YoutubeWrapper(this);
         downloader = new Downloader(this);
-        bot.registerCommands(new MusicCommands(bot)); //Make sure commands and handlers are both at the end of the onLoad
+        bot.registerCommands(new MusicCommands()); //Make sure commands and handlers are both at the end of the onLoad
         bot.registerHandlers((musicHandler = new MusicHandler(bot))); //method to ensure the other classes are available to them
         for (IGuild g : bot.getClient().getGuilds()) {
             audioPlayers.put(g, new SpecialAudioPlayer(bot, g));

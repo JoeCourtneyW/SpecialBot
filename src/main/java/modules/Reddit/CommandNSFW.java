@@ -3,7 +3,6 @@ package modules.Reddit;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
-import main.SpecialBot;
 import net.dean.jraw.models.Submission;
 import net.dean.jraw.models.SubredditSort;
 import net.dean.jraw.models.TimePeriod;
@@ -13,17 +12,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-public class CommandNSFW extends CommandExecutor {
+public class CommandNSFW implements CommandExecutor {
 
     private static HashMap<String, ArrayList<Submission>> cache = new HashMap<>();
     private static String defaultSubreddit = "nsfw";
     private static String defaultMultireddit = "nsfw";
-    private static SpecialBot bot;
-
-    public CommandNSFW(SpecialBot bot) {
-        super(bot);
-        CommandNSFW.bot = bot;
-    }
 
     @Command(label = "nsfw")
     public static void onNSFW(CommandEvent event) {

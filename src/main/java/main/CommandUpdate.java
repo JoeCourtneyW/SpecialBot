@@ -6,10 +6,7 @@ import main.Commands.CommandExecutor;
 
 import java.io.IOException;
 
-public class CommandUpdate extends CommandExecutor {
-    public CommandUpdate(SpecialBot bot) {
-        super(bot);
-    }
+public class CommandUpdate implements CommandExecutor {
 
     @Command(label = "update", adminOnly = true)
     public void onUpdate(CommandEvent event) {

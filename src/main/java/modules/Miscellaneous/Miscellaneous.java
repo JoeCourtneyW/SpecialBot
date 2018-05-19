@@ -6,7 +6,7 @@ public class Miscellaneous implements SpecialModule {
 
 
     public boolean onLoad() {
-        bot.registerCommands(new MiscCommands(bot));
+        bot.registerCommands(new MiscCommands());
         return true;
     }
 

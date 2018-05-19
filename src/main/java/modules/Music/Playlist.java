@@ -1,4 +1,4 @@
-package main.JsonObjects;
+package modules.Music;
 
 import org.jetbrains.annotations.NotNull;
 

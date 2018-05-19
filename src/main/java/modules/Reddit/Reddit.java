@@ -17,7 +17,7 @@ public class Reddit implements SpecialModule {
 
     public boolean onLoad() {
         authenticate();
-        bot.registerCommands(new CommandNSFW(bot));
+        bot.registerCommands(new CommandNSFW());
         return true;
     }
 

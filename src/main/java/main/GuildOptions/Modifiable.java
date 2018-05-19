@@ -1,7 +1,10 @@
 package main.GuildOptions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Modifiable {
-    //Empty interface, woo!
     String name();
     String description() default "Unconfigured";
 }

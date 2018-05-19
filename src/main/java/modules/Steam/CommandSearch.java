@@ -3,13 +3,8 @@ package modules.Steam;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
-import main.SpecialBot;
 
-public class CommandSearch extends CommandExecutor {
-
-    public CommandSearch(SpecialBot bot) {
-        super(bot);
-    }
+public class CommandSearch implements CommandExecutor {
 
     @Command(label = "search")
     public void onSearch(CommandEvent event) {

@@ -1,6 +1,5 @@
 package main;
 
-import main.JsonObjects.Credentials;
 import modules.AutoRole.AutoRole;
 import modules.Miscellaneous.Miscellaneous;
 import modules.Music.Music;

@@ -1,32 +1,28 @@
 package modules.TempMembership;
 
-import main.JsonObjects.GuildOptions;
+import main.GuildOptions.GuildOptions;
 import main.SpecialModule;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import utils.LoggerUtil;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class TempMembership implements SpecialModule {
 
+    private final long length = 1000 * 60 * 60 * 24;
 
-    public boolean onLoad() { //TODO: Try using guild#getUserJoinDate
+    public boolean onLoad() {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            String hour = new SimpleDateFormat("HH").format(new Date()); //Grabs the 24 hour formatted hour that it currently is
-            if (Integer.valueOf(hour) == 6) {
-                //It's part of the 6AM hour, start kicking members who have overstayed their welcome
-                for (IGuild guild : bot.getClient().getGuilds()) {
-                    GuildOptions guildOptions = bot.getGuildOptions(guild);
-                    if (guildOptions.AUTO_KICK && !guildOptions.DEFAULT_ROLE.isEmpty()) {
-                        for (IUser user : guild.getUsers()) {
-                            if (user.hasRole(guild.getRoleByID(Long.parseLong(guildOptions.DEFAULT_ROLE)))) { //they are still default role
+            for (IGuild guild : bot.getClient().getGuilds()) {
+                GuildOptions guildOptions = bot.getGuildOptions(guild);
+                if (guildOptions.AUTO_KICK && !guildOptions.DEFAULT_ROLE.isEmpty()) {
+                    for (IUser user : guild.getUsers()) {
+                        if (user.hasRole(guild.getRoleByID(Long.parseLong(guildOptions.DEFAULT_ROLE)))) { //they are still default role
+                            if (guild.getJoinTimeForUser(user).toEpochMilli() - System.currentTimeMillis() > length) {
                                 LoggerUtil.INFO("Default role found, removing from the server");
                                 guild.kickUser(user, "");
-                                //TODO: Try to use IUser#getCreationDate to see if that shows when they joined the guild
                             }
                         }
                     }

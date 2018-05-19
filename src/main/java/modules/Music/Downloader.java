@@ -4,7 +4,6 @@ import com.sapher.youtubedl.YoutubeDL;
 import com.sapher.youtubedl.YoutubeDLException;
 import com.sapher.youtubedl.YoutubeDLRequest;
 import com.sapher.youtubedl.YoutubeDLResponse;
-import main.JsonObjects.Playlist;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 import utils.LoggerUtil;
 
