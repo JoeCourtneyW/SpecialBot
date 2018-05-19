@@ -24,7 +24,6 @@ public class SpecialBot {
     public SpecialBot(IDiscordClient client) {
         this.client = client;
         registerCommandsHandler();
-
     }
 
     public void setupClient(String client_id) {
@@ -38,9 +37,9 @@ public class SpecialBot {
             System.exit(0);
             return;
         }
-        for (IVoiceChannel channel : client.getConnectedVoiceChannels()) {
-            channel.leave(); //If bot autoconnects to a channel when it logs back in, leave that channel
-        }
+
+        client.getConnectedVoiceChannels().forEach(IVoiceChannel::leave);
+
     }
 
     public IDiscordClient getClient() {

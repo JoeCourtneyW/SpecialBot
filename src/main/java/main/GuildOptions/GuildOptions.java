@@ -21,12 +21,9 @@ public class GuildOptions {
     public boolean AUTO_KICK = false;
 
     public Playlist getPlaylistByName(String name) {
-        for (Playlist p : PLAYLISTS) {
-            if (p.NAME.equalsIgnoreCase(name)) {
-                return p;
-            }
-        }
-        return null;
+        return PLAYLISTS.stream()
+                .filter(playlist -> playlist.NAME.equalsIgnoreCase(name))
+                .findFirst().orElse(null);
     }
 
     public String toString() {

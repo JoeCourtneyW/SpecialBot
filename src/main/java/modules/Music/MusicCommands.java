@@ -219,9 +219,8 @@ public class MusicCommands implements CommandExecutor {
         } else if (event.getArgs()[0].equalsIgnoreCase("list")) { //Lists all playlists on the server
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.withTitle("Playlists");
-            for (Playlist playlist : options.PLAYLISTS) {
-                embedBuilder.appendField(playlist.NAME, playlist.SONGS.size() + " song(s)", true);
-            }
+            options.PLAYLISTS.forEach(playlist ->
+                    embedBuilder.appendField(playlist.NAME, playlist.SONGS.size() + " song(s)", true));
             event.reply(embedBuilder.build());
         } else if (event.getArgs()[0].equalsIgnoreCase("show")) { //Shows all songs on the given playlist
             if (event.getArgs().length > 1) {
@@ -316,9 +315,9 @@ public class MusicCommands implements CommandExecutor {
                     return;
                 }
                 List<Playlist> copiedList = new ArrayList<>(options.PLAYLISTS);
-                for (Playlist toDelete : copiedList)
-                    if (toDelete.NAME.equalsIgnoreCase(playlist.NAME))
-                        options.PLAYLISTS.remove(toDelete);
+                copiedList.stream()
+                        .filter(toDelete -> playlist.NAME.equalsIgnoreCase(toDelete.NAME))
+                        .forEach(options.PLAYLISTS::remove);
                 bot.updateGuildOptions(options);
                 event.reply("*You have successfully deleted* **" + playlist.NAME + "**");
             } else {
@@ -341,7 +340,7 @@ public class MusicCommands implements CommandExecutor {
         }
     }
 
-    public void joinVoiceChannel(IGuild guild,  IUser user){
+    public void joinVoiceChannel(IGuild guild, IUser user){
         try {
             if (bot.getClient().getConnectedVoiceChannels().size() == 0) { //Make sure to join the voice channel before trying to play
                 if (user.getVoiceStateForGuild(guild) != null) //If the user is in a voice channel

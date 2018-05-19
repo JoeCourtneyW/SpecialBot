@@ -21,16 +21,35 @@ public class CommandNSFW implements CommandExecutor {
     @Command(label = "nsfw")
     public static void onNSFW(CommandEvent event) {
         ArrayList<Submission> images = new ArrayList<>();
-        boolean multiReddit = false;
-        String search = defaultSubreddit;
-        int limit = 50;
+        boolean multiReddit;
+        String search;
+        int limit = 100;
 
         if (event.getArgs().length == 2) {
             multiReddit = event.getArgs()[0].toLowerCase().contains("m");
-            search = event.getArgs()[1];
+            search = event.getArgs()[1].toLowerCase();
+        } else if (event.getArgs().length == 0) {
+            multiReddit = false;
+            search = defaultSubreddit;
+        } else {
+            event.reply("Incorrect usage: .nsfw [m, s] [sub/multireddit name]");
+            return;
         }
+
+        if (multiReddit) {
+            if (Reddit.reddit.me().multi(search) == null) {
+                event.reply("That multireddit does not exist!");
+                return;
+            }
+        } else {
+            if (Reddit.reddit.subreddit(search) == null) {
+                event.reply("That subreddit does not exist!");
+                return;
+            }
+        }
+
         ArrayList<Submission> listing;
-        if (cache.get(search) == null) {
+        if (cache.containsKey(search)) {
             DefaultPaginator<Submission> aggregator;
             DefaultPaginator.Builder<Submission, SubredditSort> builder;
             if (multiReddit)
@@ -42,20 +61,18 @@ public class CommandNSFW implements CommandExecutor {
                     .sorting(SubredditSort.HOT)
                     .timePeriod(TimePeriod.DAY)
                     .build();
-            for (Submission s : aggregator.next()) {
-                if (!s.isSelfPost()) {
-                    images.add(s);
-                }
-            }
+            //If the post is not a self post, cache it
+            aggregator.next().stream()
+                    .filter(Submission::isSelfPost)
+                    .filter(post -> post.getDomain().contains("imgur.com")
+                            || post.getDomain().contains("i.redd.it")
+                            || post.getDomain().contains("i.redditmedia.com")
+                            || post.getDomain().contains("gyfcat.com"))
+                    .forEach(images::add);
             cache.put(search, images);
             listing = images;
         } else {
             listing = cache.get(search);
-        }
-        for (Submission post : listing) {
-            if (!(post.getDomain().contains("imgur.com") || post.getDomain().contains("i.redd.it") || post.getDomain().contains("gfycat.com"))) {
-                listing.remove(post);
-            }
         }
         Submission post = listing.get(new Random().nextInt(listing.size()));
         event.reply("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*" + "\n" + post.getUrl());
