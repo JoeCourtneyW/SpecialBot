@@ -25,6 +25,7 @@ public class ApiRequest {
     public ApiRequest(String baseUrl) {
         this.url = new StringBuilder(baseUrl);
         parameters = new HashMap<>();
+        headers = new HashMap<>();
     }
 
     public ApiRequest setEndpoint(String endpoint) {
@@ -76,6 +77,9 @@ public class ApiRequest {
         requestUrl = requestUrl.replaceFirst("&", "?");
         HttpGet req = new HttpGet(requestUrl);
         req.addHeader("Content-Type", "application/json");
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            req.addHeader(header.getKey(), header.getValue());
+        }
         try {
             HttpResponse httpResponse = httpClient.execute(req);
             JsonNode content = objectMapper.readTree(httpResponse.getEntity().getContent());

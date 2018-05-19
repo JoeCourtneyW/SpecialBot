@@ -7,6 +7,7 @@ import modules.Music.Music;
 import modules.Reddit.Reddit;
 import modules.Steam.Steam;
 import modules.TempMembership.TempMembership;
+import modules.Twitch.Twitch;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -62,6 +63,7 @@ public class Main {
         bot.loadModule(new TempMembership());
         bot.loadModule(new Reddit());
         bot.loadModule(new Steam());
+        bot.loadModule(new Twitch());
         bot.loadModule(new Music());
         bot.loadModule(new Miscellaneous());
     }
