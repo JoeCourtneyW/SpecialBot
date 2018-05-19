@@ -50,7 +50,7 @@ public class CommandsHandler {
                         Method commandMethod = commands.get(ca);
                         commandMethod.setAccessible(true);
                         CommandExecutor declaringClassInstance = (CommandExecutor) commandMethod.getDeclaringClass()
-                                .getConstructor(SpecialBot.class).newInstance(bot); //Creates new instance of commandexecutor class with required constructor
+                                .getConstructor().newInstance(); //Creates new instance of commandexecutor class with required constructor
                         commandMethod.invoke(declaringClassInstance, new CommandEvent(bot, ca,//Invokes command method with CommandEvent arg
                                 event.getGuild(),
                                 event.getChannel(),
