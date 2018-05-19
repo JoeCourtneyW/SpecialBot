@@ -49,7 +49,7 @@ public class CommandNSFW implements CommandExecutor {
         }
 
         ArrayList<Submission> listing;
-        if (cache.containsKey(search)) {
+        if (!cache.containsKey(search)) {
             DefaultPaginator<Submission> aggregator;
             DefaultPaginator.Builder<Submission, SubredditSort> builder;
             if (multiReddit)
