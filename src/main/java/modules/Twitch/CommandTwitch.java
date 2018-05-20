@@ -17,16 +17,27 @@ public class CommandTwitch implements CommandExecutor {
             event.reply("Enter a streamer's name as the first argument");
             return;
         }
+
         String channelName = event.getArgs()[0];
-        JsonNode channel = new ApiRequest("https://api.twitch.tv").setEndpoint("/kraken/channels/" + channelName)
+        JsonNode response = new ApiRequest("https://api.twitch.tv").setEndpoint("/kraken/channels/" + channelName)
                 .addHeader("Client-ID", "17vs6h16pb0esv8gushd351lm5ln9t") //Client IDs can be shared publicly
-                .get().get("content");
+                .get();
+
+        if(response.get("status").asInt() != 200) {
+            event.reply("Streamer not found");
+            return;
+        }
+
+        JsonNode channel = response.get("content");
+
 
         EmbedBuilder embed = new EmbedBuilder()
         .withTitle(channel.get("display_name").asText())
         .withUrl("http://twitch.tv/" + channel.get("display_name").asText())
-        .withThumbnail(channel.get("logo").asText())
-        .withDescription(channel.get("status").asText());
+        .withThumbnail(channel.get("logo").asText());
+
+        if(channel.get("status").asText() != null)
+        embed.withDescription(channel.get("status").asText());
 
         NumberFormat numberFormatter = NumberFormat.getInstance(Locale.getDefault());
 
@@ -40,6 +51,7 @@ public class CommandTwitch implements CommandExecutor {
                 .setParameter("login", "timthetatman")
                 .get().get("content").get("data").get(0).get("view_count").asInt());
         System.out.println(.get("content").get("_total").asInt()); */
+
         event.reply(embed.build());
     }
 }

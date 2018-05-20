@@ -5,6 +5,7 @@ import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
 import main.Main;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.HttpException;
 import utils.http.ApiRequest;
 
@@ -17,7 +18,7 @@ public class MiscCommands implements CommandExecutor {
                 .setParameter("filter[posts_per_page]", "1")
                 .get();
         int status = response.get("status").asInt();
-        String quote = response.get("content").get(0).get("content").asText();
+        String quote = StringEscapeUtils.unescapeHtml4(response.get("content").get(0).get("content").asText());
         if (status == 200) //Trimming five chars from quote length for "\n" & "<p>" from html content
             event.reply("*\"" + quote.substring(3, quote.length() - 6).trim() + "\"* - " + response.get("content").get(0).get("title").asText());
         else

@@ -37,15 +37,24 @@ public class CommandNSFW implements CommandExecutor {
         }
 
         if (multiReddit) {
-            if (Reddit.reddit.me().multi(search) == null) {
-                event.reply("That multireddit does not exist!");
+            try {
+                Reddit.reddit.me().multi(search).about();
+            } catch (NullPointerException e) {
+                event.reply("That multreddit does not exist!");
                 return;
             }
         } else {
-            if (Reddit.reddit.subreddit(search) == null) {
+            try {
+                Reddit.reddit.subreddit(search).about();
+            } catch (NullPointerException e) {
                 event.reply("That subreddit does not exist!");
                 return;
             }
+        }
+
+        if(!Reddit.reddit.subreddit(search).about().isNsfw()){
+            event.reply("Not an nsfw subreddit");
+            return;
         }
 
         ArrayList<Submission> listing;
