@@ -9,4 +9,5 @@ public class Credentials {
     public String REDDIT_SECRET_KEY;
     public String GOOGLE_API_KEY;
     public String BITLY_KEY;
+    public String TRN_API_KEY;
 }

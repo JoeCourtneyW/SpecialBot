@@ -11,13 +11,13 @@ public class GuildOptions {
     public String GUILD_ID;
     public List<Playlist> PLAYLISTS = new ArrayList<>();
     public List<SteamGame> WISHLIST = new ArrayList<>();
-    @Modifiable(name = "prefix")
+    @Modifiable(name = "prefix", validation = Modifiable.InputType.STRING)
     public String PREFIX = ".";
-    @Modifiable(name = "volume")
+    @Modifiable(name = "volume", validation = Modifiable.InputType.INTEGER)
     public int BOT_VOLUME = 100;
-    @Modifiable(name = "defaultRole")
+    @Modifiable(name = "defaultRole", validation = Modifiable.InputType.ROLE_MENTION)
     public String DEFAULT_ROLE = "";
-    @Modifiable(name = "tempMembership")
+    @Modifiable(name = "tempMembership", validation = Modifiable.InputType.BOOLEAN)
     public boolean AUTO_KICK = false;
 
     public Playlist getPlaylistByName(String name) {

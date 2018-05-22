@@ -1,8 +1,10 @@
 package utils.http;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 public class UrlUtil {
@@ -26,5 +28,22 @@ public class UrlUtil {
             e.printStackTrace();
             return null;
         }
+    }
+    public static String encodeURIComponent(String s) {
+        String result;
+
+        try {
+            result = URLEncoder.encode(s, "UTF-8")
+                    .replaceAll("\\+", "%20")
+                    .replaceAll("\\%21", "!")
+                    .replaceAll("\\%27", "'")
+                    .replaceAll("\\%28", "(")
+                    .replaceAll("\\%29", ")")
+                    .replaceAll("\\%7E", "~");
+        } catch (UnsupportedEncodingException e) {
+            result = s;
+        }
+
+        return result;
     }
 }
