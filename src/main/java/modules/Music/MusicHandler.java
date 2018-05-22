@@ -1,6 +1,8 @@
 package modules.Music;
 
 import main.SpecialBot;
+import modules.Music.declarations.Playlist;
+import modules.Music.declarations.Song;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.audio.events.TrackFinishEvent;
@@ -38,14 +40,14 @@ public class MusicHandler {
             bot.sendChannelMessage("Added **" + playlist.NAME + "** to the queue. *(" + playlist.SONGS.size() + " songs)*",
                     music.getAudioPlayer(guild).getLastChannel());
     }
-    public void onQueue(IGuild guild, Playlist.Song song){
+    public void onQueue(IGuild guild, Song song){
         if(music.getAudioPlayer(guild).getPlaying() != null) {
             bot.sendChannelMessage("Added **" + song.TITLE + "** to the queue.",
                     music.getAudioPlayer(guild).getLastChannel());
         }
     }
 
-    public void onStart(IGuild guild, Playlist.Song song){
+    public void onStart(IGuild guild, Song song){
         bot.sendChannelMessage("Now playing **" + song.TITLE + "**.",
                 music.getAudioPlayer(guild).getLastChannel());
     }
