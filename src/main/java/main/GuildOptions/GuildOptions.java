@@ -1,6 +1,6 @@
 package main.GuildOptions;
 
-import modules.Music.Playlist;
+import modules.Music.declarations.Playlist;
 import modules.Steam.SteamGame;
 
 import java.util.ArrayList;

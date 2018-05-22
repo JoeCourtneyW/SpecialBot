@@ -5,6 +5,9 @@ import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
 import main.GuildOptions.GuildOptions;
+import modules.Music.declarations.LoopState;
+import modules.Music.declarations.Playlist;
+import modules.Music.declarations.Song;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
@@ -29,7 +32,7 @@ public class MusicCommands implements CommandExecutor {
 
             long trackDuration;
 
-            Playlist.Song playing = music.getAudioPlayer(event.getGuild()).getPlaying();
+            Song playing = music.getAudioPlayer(event.getGuild()).getPlaying();
             if (playing != null) {
 
                 trackDuration = playing.DURATION;
@@ -40,7 +43,7 @@ public class MusicCommands implements CommandExecutor {
 
                 totalDuration += (trackDuration - music.getAudioPlayer(event.getGuild()).getPlayingPosition().toMillis());
             }
-            for (Playlist.Song song : music.getAudioPlayer(event.getChannel().getGuild()).getSongQueue()) {
+            for (Song song : music.getAudioPlayer(event.getChannel().getGuild()).getSongQueue()) {
                 counter++;
 
                 trackDuration = song.DURATION;
@@ -69,7 +72,7 @@ public class MusicCommands implements CommandExecutor {
                 event.reply("*That video is too long to play! Videos must be under 10 minutes*");
                 return;
             }
-            music.getAudioPlayer(event.getGuild()).queueSong(new Playlist.Song(id, title, duration));
+            music.getAudioPlayer(event.getGuild()).queueSong(new Song(id, title, duration));
         } else { //Search the youtube library and try to find the song provided
             String query = event.getArgsAsString(0);
             Pair<String, String> video;
@@ -84,7 +87,7 @@ public class MusicCommands implements CommandExecutor {
                 event.reply("*That video is too long to play! Videos must be under 10 minutes*");
                 return;
             }
-            music.getAudioPlayer(event.getGuild()).queueSong(new Playlist.Song(video.getKey(), video.getValue(), duration));
+            music.getAudioPlayer(event.getGuild()).queueSong(new Song(video.getKey(), video.getValue(), duration));
         }
 
 
@@ -96,7 +99,7 @@ public class MusicCommands implements CommandExecutor {
 
         StringBuilder historyList = new StringBuilder();
         int counter = 0;
-        for (Playlist.Song song : music.getAudioPlayer(event.getChannel().getGuild()).getSongHistory()) {
+        for (Song song : music.getAudioPlayer(event.getChannel().getGuild()).getSongHistory()) {
             counter++;
             historyList.append((counter)).append(") **").append(song.TITLE).append("** - *")
                     .append(getReadableDuration(Duration.ofMillis(song.DURATION))).append("*\n");
@@ -233,7 +236,7 @@ public class MusicCommands implements CommandExecutor {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 int counter = 1;
                 long totalDuration = 0;
-                for (Playlist.Song song : playlist.SONGS) {
+                for (Song song : playlist.SONGS) {
                     embedBuilder.appendField(counter + ") " + song.TITLE, getReadableDuration(Duration.ofMillis(song.DURATION)), true);
                     counter++;
                     totalDuration += song.DURATION;
@@ -267,7 +270,7 @@ public class MusicCommands implements CommandExecutor {
                     return;
                 }
 
-                playlist.SONGS.add(new Playlist.Song(video.getKey(), video.getValue(), music.getYoutubeWrapper().getVideoDuration(video.getKey())));
+                playlist.SONGS.add(new Song(video.getKey(), video.getValue(), music.getYoutubeWrapper().getVideoDuration(video.getKey())));
 
                 bot.updateGuildOptions(options);
                 event.reply("Added **" + video.getValue() + "** to the playlist **" + name + "**");
@@ -299,7 +302,7 @@ public class MusicCommands implements CommandExecutor {
                     event.reply("*You must choose an index within the playlist size*");
                     return;
                 }
-                Playlist.Song song = playlist.SONGS.get(songIndex);
+                Song song = playlist.SONGS.get(songIndex);
                 playlist.SONGS.remove(songIndex - 1);
                 bot.updateGuildOptions(options);
                 event.reply("Removed **" + song.TITLE + "** from the playlist **" + playlist.NAME + "**");
@@ -337,6 +340,8 @@ public class MusicCommands implements CommandExecutor {
             } else {
                 event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
             }
+        } else {
+            event.reply("Enter a second argument: [create, list, play, show, add, remove, delete]");
         }
     }
 

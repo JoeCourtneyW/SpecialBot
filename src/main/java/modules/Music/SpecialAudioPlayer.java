@@ -1,6 +1,9 @@
 package modules.Music;
 
 import main.SpecialBot;
+import modules.Music.declarations.LoopState;
+import modules.Music.declarations.Playlist;
+import modules.Music.declarations.Song;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.audio.AudioPlayer;
@@ -19,9 +22,9 @@ public class SpecialAudioPlayer {
     private IChannel lastChannel;
     private long lastAction;
 
-    private Playlist.Song playing;
-    private Queue<Playlist.Song> songQueue;
-    private Queue<Playlist.Song> songHistory;
+    private Song playing;
+    private Queue<Song> songQueue;
+    private Queue<Song> songHistory;
     private final int limit = 25;
 
     private LoopState loopState = LoopState.OFF;
@@ -74,7 +77,7 @@ public class SpecialAudioPlayer {
         NEXT
     */
 
-    public void queueSong(Playlist.Song song) {
+    public void queueSong(Song song) {
         Music.instance.getDownloader().getDownloadThreads().submit(() -> {
             if (!Downloader.isDownloaded(song)) {
                 Music.instance.getBot().sendChannelMessage("Downloading song...", lastChannel);
@@ -97,7 +100,7 @@ public class SpecialAudioPlayer {
             if(!playlist.SONGS.stream().allMatch(Downloader::isDownloaded)){ //TODO: Add counter in message that updates the amount of songs downloaded out of total
                 Music.instance.getBot().sendChannelMessage("Downloading songs, This may take a second...", lastChannel);
             }
-            for (Playlist.Song song : playlist) {
+            for (Song song : playlist) {
                 if (!Downloader.isDownloaded(song)) {
                     Music.instance.getDownloader().download(song);
                 }
@@ -141,16 +144,16 @@ public class SpecialAudioPlayer {
     }
 
     public void shuffleQueue() {
-        List<Playlist.Song> shuffled = new ArrayList<>(songQueue);
+        List<Song> shuffled = new ArrayList<>(songQueue);
         Collections.shuffle(shuffled);
         this.songQueue = new LinkedList<>(shuffled);
     }
 
-    public Queue<Playlist.Song> getSongQueue() {
+    public Queue<Song> getSongQueue() {
         return songQueue;
     }
 
-    public Playlist.Song getPlaying() {
+    public Song getPlaying() {
         return playing;
     }
 
@@ -158,7 +161,7 @@ public class SpecialAudioPlayer {
         return Duration.ofMillis(audioPlayer.getCurrentTrack().getCurrentTrackTime());
     }
 
-    public Queue<Playlist.Song> getSongHistory() {
+    public Queue<Song> getSongHistory() {
         return songHistory;
     }
 

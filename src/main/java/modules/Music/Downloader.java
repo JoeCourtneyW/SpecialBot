@@ -4,6 +4,7 @@ import com.sapher.youtubedl.YoutubeDL;
 import com.sapher.youtubedl.YoutubeDLException;
 import com.sapher.youtubedl.YoutubeDLRequest;
 import com.sapher.youtubedl.YoutubeDLResponse;
+import modules.Music.declarations.Song;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 import utils.LoggerUtil;
 
@@ -25,7 +26,7 @@ public class Downloader {
         downloadThreads = Executors.newFixedThreadPool(5);
     }
 
-    public Playlist.Song DOWNLOAD_YOUTUBE_URL_EXE_WRAPPED(final String url) {
+    public Song DOWNLOAD_YOUTUBE_URL_EXE_WRAPPED(final String url) {
 
         YoutubeDLRequest request = new YoutubeDLRequest(url, Music.instance.getMusicDirectory().getPath());
         request.setOption("id");
@@ -38,7 +39,7 @@ public class Downloader {
             YoutubeDLResponse response = YoutubeDL.execute(request);
             String id = response.getOut().substring(0, response.getOut().length() - 5); //Shaves off .mp3
             File file = new File(Music.instance.getMusicDirectory().getPath() + File.separator + id + ".mp3");
-            return new Playlist.Song(id, Music.instance.getYoutubeWrapper().getVideoTitle(id), getFileDuration(file));
+            return new Song(id, Music.instance.getYoutubeWrapper().getVideoTitle(id), getFileDuration(file));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -49,7 +50,7 @@ public class Downloader {
         return downloadThreads;
     }
 
-    public static File getFile(Playlist.Song song) {
+    public static File getFile(Song song) {
         return new File(Music.instance.getMusicDirectory().getPath() + File.separator + song.ID + ".mp3");
     }
 
@@ -70,11 +71,11 @@ public class Downloader {
         }
     }
 
-    public static boolean isDownloaded(Playlist.Song song) {
+    public static boolean isDownloaded(Song song) {
         return new File(Music.instance.getMusicDirectory().getPath() + File.separator + song.ID + ".mp3").exists();
     }
 
-    public void download(Playlist.Song song) {
+    public void download(Song song) {
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
             LoggerUtil.DEBUG("Detected Windows, downloading through EXE...");
             downloadThroughEXE(song);
@@ -93,7 +94,7 @@ public class Downloader {
         }
     }
 
-    private void downloadThroughEXE(Playlist.Song song) {
+    private void downloadThroughEXE(Song song) {
         if (!isDownloaded(song)) {
             String url = "http://youtu.be/" + song.ID;
             YoutubeDLRequest request = new YoutubeDLRequest(url, Music.instance.getMusicDirectory().getPath());
