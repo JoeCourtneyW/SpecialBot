@@ -5,6 +5,7 @@ import modules.AutoRole.AutoRole;
 import modules.Miscellaneous.Miscellaneous;
 import modules.Music.Music;
 import modules.Reddit.Reddit;
+import modules.StatTracking.StatTracking;
 import modules.Steam.Steam;
 import modules.TempMembership.TempMembership;
 import modules.Twitch.Twitch;
@@ -64,6 +65,7 @@ public class Main {
         bot.loadModule(new Reddit());
         bot.loadModule(new Steam());
         bot.loadModule(new Twitch());
+        bot.loadModule(new StatTracking());
         bot.loadModule(new Music());
         bot.loadModule(new Miscellaneous());
     }
