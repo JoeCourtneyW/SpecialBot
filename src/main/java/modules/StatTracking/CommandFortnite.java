@@ -28,12 +28,13 @@ public class CommandFortnite implements CommandExecutor {
         }
         EmbedBuilder embed = new EmbedBuilder()
         .withTitle(response.get("content").get("epicUserHandle").asText())
-        .withImage("https://fortniteskins.net/wp-content/uploads/2018/03/tracker-outfit.png")
+        .withThumbnail("https://fortniteskins.net/wp-content/uploads/2018/03/tracker-outfit.png")
         .withUrl("https://fortnitetracker.com/profile/pc/" + response.get("content").get("epicUserHandle").asText());
 
         JsonNode lifetimeStats = response.get("content").get("lifeTimeStats");
         for(JsonNode stat : lifetimeStats){
-            embed.appendField(stat.get("key").asText(), stat.get("value").asText(), true);
+            if(!stat.get("key").asText().contains("Top"))
+                embed.appendField(stat.get("key").asText(), stat.get("value").asText(), true);
         }
 
         event.reply(embed.build());
