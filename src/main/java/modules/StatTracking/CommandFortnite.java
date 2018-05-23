@@ -19,7 +19,7 @@ public class CommandFortnite implements CommandExecutor {
         }
         String username = UrlUtil.encodeURIComponent(event.getArgsAsString(0));
         JsonNode response = new ApiRequest("https://api.fortnitetracker.com")
-                .setEndpoint("v1/profile/pc/" + username)
+                .setEndpoint("/v1/profile/pc/" + username)
                 .addHeader("TRN-Api-Key", Main.CREDENTIALS.TRN_API_KEY)
                 .get();
         if(response.get("status").asInt() != 200){
