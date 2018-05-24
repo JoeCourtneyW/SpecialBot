@@ -52,11 +52,6 @@ public class CommandNSFW implements CommandExecutor {
             }
         }
 
-        if(!Reddit.reddit.subreddit(search).about().isNsfw()){
-            event.reply("Not an nsfw subreddit");
-            return;
-        }
-
         ArrayList<Submission> listing;
         if (!cache.containsKey(search)) {
             DefaultPaginator<Submission> aggregator;
