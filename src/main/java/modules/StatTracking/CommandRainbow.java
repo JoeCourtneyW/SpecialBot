@@ -11,9 +11,9 @@ import utils.http.UrlUtil;
 
 public class CommandRainbow implements CommandExecutor {
 
-    @Command(label="rainbow")
-    public void fortnite(CommandEvent event){
-        if(event.getArgs().length == 0){
+    @Command(label = "rainbow")
+    public void fortnite(CommandEvent event) {
+        if (event.getArgs().length == 0) {
             event.reply("You must enter a username to search");
             return;
         }
@@ -23,7 +23,7 @@ public class CommandRainbow implements CommandExecutor {
                 .addHeader("TRN-Api-Key", Main.CREDENTIALS.TRN_API_KEY);
         StatTracking.instance.fortniteRequestPool.offer(() -> {
             JsonNode response = request.get();
-            if(response.get("status").asInt() != 200){
+            if (response.get("status").asInt() != 200) {
                 event.reply("Player not found! They may not have an Epic Account set up");
                 return;
             }
@@ -33,11 +33,13 @@ public class CommandRainbow implements CommandExecutor {
                     .withUrl("https://fortnitetracker.com/profile/pc/" + response.get("content").get("epicUserHandle").asText());
 
             JsonNode lifetimeStats = response.get("content").get("lifeTimeStats");
-            for(JsonNode stat : lifetimeStats){
-                if(!stat.get("key").asText().contains("Top"))
+            for (JsonNode stat : lifetimeStats) {
+                if (!stat.get("key").asText().contains("Top"))
                     embed.appendField(stat.get("key").asText(), stat.get("value").asText(), true);
             }
 
             event.reply(embed.build());
         });
+
+    }
 }
