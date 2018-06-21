@@ -7,6 +7,7 @@ import main.Commands.CommandExecutor;
 import main.Main;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.HttpException;
+import sx.blah.discord.util.RateLimitException;
 import utils.http.ApiRequest;
 
 public class MiscCommands implements CommandExecutor {
@@ -29,7 +30,7 @@ public class MiscCommands implements CommandExecutor {
     @Command(label = "shorten", description = "Shorten a given url using BITLY")
     public void shortenCommand(CommandEvent event) throws HttpException {
         if (event.getArgs().length == 0) {
-            event.reply("You must enter a link to shorten");
+            event.reply("*You must enter a link to shorten*");
             return;
         }
         String longUrl = event.getArgs()[0];
@@ -56,10 +57,13 @@ public class MiscCommands implements CommandExecutor {
         if (count > 10) {
             count = 10;
         }
-        count++;
-
-        event.getChannel().getMessageHistory(count).bulkDelete();
-        event.reply("Cleansed " + count + " messages from the channel.");
+        try {
+            event.getChannel().getMessageHistory(count + 1).bulkDelete();
+        } catch(RateLimitException e){
+            event.reply("*Slow down, you've been ratelimited!*");
+            return;
+        }
+        event.reply("***Cleansed " + count + " messages from the channel***");
 
     }
 }
