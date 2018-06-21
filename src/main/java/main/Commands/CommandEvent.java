@@ -69,4 +69,20 @@ public class CommandEvent {
         }
         return name.toString();
     }
+    public boolean isInteger(String argument){
+        try{
+            Integer.parseInt(argument);
+            return true;
+        } catch(NumberFormatException e){
+            return false;
+        }
+    }
+    public boolean isDouble(String argument){
+        try{
+            Double.parseDouble(argument);
+            return true;
+        } catch(NumberFormatException e){
+            return false;
+        }
+    }
 }

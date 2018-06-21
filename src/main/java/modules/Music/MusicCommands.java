@@ -10,6 +10,7 @@ import modules.Music.declarations.Playlist;
 import modules.Music.declarations.Song;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.EmbedBuilder;
 import utils.LoggerUtil;
 import utils.http.UrlUtil;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MusicCommands implements CommandExecutor {
     private Music music = Music.instance;
@@ -25,6 +27,13 @@ public class MusicCommands implements CommandExecutor {
     @Command(label = "queue", description = "Add a song to the song queue", alias = "play")
     public void queueCommand(CommandEvent event) {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+        //If they use alias play, with no args, then unpause the song
+        if (event.getLabel().equalsIgnoreCase("play") && event.getArgs().length == 0) {
+            music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+            music.getAudioPlayer(event.getGuild()).pauseTrack(false);
+            event.reply("**Music Unpaused**");
+            return;
+        }
         if (event.getArgs().length < 1) { //Show current queue if they aren't trying to queue a new song
             StringBuilder queueList = new StringBuilder();
             long totalDuration = 0;
@@ -93,31 +102,47 @@ public class MusicCommands implements CommandExecutor {
 
     }
 
-    @Command(label="history")
-    public void history(CommandEvent event){
+    @Command(label = "history")
+    public void history(CommandEvent event) {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
 
         StringBuilder historyList = new StringBuilder();
         int counter = 0;
-        for (Song song : music.getAudioPlayer(event.getChannel().getGuild()).getSongHistory()) {
+        for (Song song : music.getAudioPlayer(event.getGuild()).getSongHistory()) {
             counter++;
             historyList.append((counter)).append(") **").append(song.TITLE).append("** - *")
                     .append(getReadableDuration(Duration.ofMillis(song.DURATION))).append("*\n");
         }
-        if (historyList.length() == 0)
+        if (counter > 0)
             event.reply(historyList.toString());
         else
             event.reply("*No songs have been played*");
 
     }
+
     @Command(label = "bring", description = "Brings the bot to the user's current voice channel")
     public void bring(CommandEvent event) {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
-        if (event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()) != null) { //If the user is in a voice channel
-            bot.joinVoiceChannel(event.getAuthor().getVoiceStateForGuild(event.getChannel().getGuild()).getChannel());
+        if (event.getAuthor().getVoiceStateForGuild(event.getGuild()) != null) { //If the user is in a voice channel
+            bot.joinVoiceChannel(event.getAuthor().getVoiceStateForGuild(event.getGuild()).getChannel());
             event.reply("**Joining Voice Channel**");
         } else {
             event.reply("*You are not currently in a voice channel*");
+        }
+    }
+
+    @Command(label = "disconnect", description = "Remove the bot from the channel")
+    public void disconnect(CommandEvent event) {
+        music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
+
+        Optional<IVoiceChannel> iVoiceChannelOptional = bot.getClient().getConnectedVoiceChannels().stream()
+                .filter(iVoiceChannel -> iVoiceChannel.getGuild().getStringID().equalsIgnoreCase(event.getGuild().getStringID()))
+                .findFirst();
+        if (iVoiceChannelOptional.isPresent()) {
+            event.reply("**Left Voice Channel**");
+        } else {
+            event.reply("*I am not currently in a voice channel*");
+
         }
     }
 
@@ -345,7 +370,7 @@ public class MusicCommands implements CommandExecutor {
         }
     }
 
-    public void joinVoiceChannel(IGuild guild, IUser user){
+    public void joinVoiceChannel(IGuild guild, IUser user) {
         try {
             if (bot.getClient().getConnectedVoiceChannels().size() == 0) { //Make sure to join the voice channel before trying to play
                 if (user.getVoiceStateForGuild(guild) != null) //If the user is in a voice channel
@@ -353,7 +378,7 @@ public class MusicCommands implements CommandExecutor {
                 else
                     bot.joinVoiceChannel(guild.getVoiceChannels().get(0)); //If the user isn't connected to a voice channel, join the (presumably) lobby
             }
-        } catch(NullPointerException e){
+        } catch (NullPointerException e) {
             LoggerUtil.CRITICAL("Failed to join user's voice channel");
         }
     }

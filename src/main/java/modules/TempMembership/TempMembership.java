@@ -20,7 +20,7 @@ public class TempMembership implements SpecialModule {
                 if (guildOptions.AUTO_KICK && !guildOptions.DEFAULT_ROLE.isEmpty()) {
                     for (IUser user : guild.getUsers()) {
                         if (user.hasRole(guild.getRoleByID(Long.parseLong(guildOptions.DEFAULT_ROLE)))) { //they are still default role
-                            if (guild.getJoinTimeForUser(user).toEpochMilli() - System.currentTimeMillis() > length) {
+                            if (System.currentTimeMillis() - guild.getJoinTimeForUser(user).toEpochMilli() > length) {
                                 LoggerUtil.INFO("Default role found, removing from the server");
                                 guild.kickUser(user, "");
                             }

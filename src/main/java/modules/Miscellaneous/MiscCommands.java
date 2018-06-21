@@ -44,4 +44,22 @@ public class MiscCommands implements CommandExecutor {
             throw new HttpException("Link Shorten error: Status code:" + status);
 
     }
+
+    @Command(label = "cleanse")
+    public void cleanseCommand(CommandEvent event) {
+        int count = 1;
+        if (event.getArgs().length == 1) {
+            if (event.isInteger(event.getArgs()[0]))
+                count = Integer.parseInt(event.getArgs()[0]);
+        }
+
+        if (count > 10) {
+            count = 10;
+        }
+        count++;
+
+        event.getChannel().getMessageHistory(count).bulkDelete();
+        event.reply("Cleansed " + count + " messages from the channel.");
+
+    }
 }
