@@ -10,6 +10,6 @@ public @interface Modifiable {
     InputType validation();
 
     enum InputType {
-        STRING, BOOLEAN, INTEGER, USER_MENTION, ROLE_MENTION
+        STRING, BOOLEAN, INTEGER, USER_MENTION, ROLE_MENTION, CHANNEL_MENTION
     }
 }

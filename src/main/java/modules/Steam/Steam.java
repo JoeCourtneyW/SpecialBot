@@ -7,11 +7,13 @@ import org.simmetrics.builders.StringMetricBuilder;
 import org.simmetrics.metrics.SimonWhite;
 import org.simmetrics.simplifiers.Simplifiers;
 import org.simmetrics.tokenizers.Tokenizers;
+import sx.blah.discord.handle.obj.IGuild;
 import utils.http.ApiRequest;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Steam implements SpecialModule {
 
@@ -84,5 +86,17 @@ public class Steam implements SpecialModule {
                 .get();
 
         return SteamGame.buildFromAppDetails(response.get("content").get(appid).get("data"));
+    }
+
+    private void startApiPoll(){
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            for(IGuild guild : bot.getClient().getGuilds()){
+                for(int i = 0; i < bot.getGuildOptions(guild).WISHLIST.size(); i++){
+                    SteamGame game = bot.getGuildOptions(guild).WISHLIST.get(i);
+                    SteamGame updated_game = getAppDetails(game.APPID);
+
+                }
+            }
+        }, 1, 1, TimeUnit.HOURS);
     }
 }
