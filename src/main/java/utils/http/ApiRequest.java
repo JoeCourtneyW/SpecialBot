@@ -3,13 +3,20 @@ package utils.http;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,23 +48,40 @@ public class ApiRequest {
         headers.put(header, value);
         return this;
     }
-
     public JsonNode post(String postEntity) {
+        try {
+            return post(new StringEntity(postEntity));
+        } catch (UnsupportedEncodingException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public JsonNode post(HttpEntity postEntity) {
         for (Map.Entry<String, String> param : parameters.entrySet()) {
             url.append("&").append(param.getKey()).append("=").append(param.getValue());
         }
         String requestUrl = url.toString();
         requestUrl = requestUrl.replaceFirst("&", "?");
         HttpPost req = new HttpPost(requestUrl);
-        req.addHeader("Content-Type", "application/json");
         for (Map.Entry<String, String> header : headers.entrySet()) {
             req.addHeader(header.getKey(), header.getValue());
         }
+        req.addHeader("Content-Type", "application/json");
+        req.setEntity(postEntity);
+
         try {
             HttpResponse httpResponse = httpClient.execute(req);
-            JsonNode content = objectMapper.readTree(httpResponse.getEntity().getContent());
+
             ObjectNode response = objectMapper.createObjectNode();
-            response.set("content", content);
+            String responseContent = IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8");
+            if(isJSONValid(responseContent)){
+                JsonNode content = objectMapper.readTree(responseContent);
+                response.set("content", content);
+            } else {
+                System.out.println(responseContent);
+                response.put("content", responseContent);
+            }
             response.put("status", httpResponse.getStatusLine().getStatusCode());
             return response;
         } catch (IOException e) {
@@ -82,9 +106,15 @@ public class ApiRequest {
         }
         try {
             HttpResponse httpResponse = httpClient.execute(req);
-            JsonNode content = objectMapper.readTree(httpResponse.getEntity().getContent());
             ObjectNode response = objectMapper.createObjectNode();
-            response.set("content", content);
+            String responseContent = IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8");
+            if(isJSONValid(responseContent)){
+                JsonNode content = objectMapper.readTree(responseContent);
+                response.set("content", content);
+            } else {
+                System.out.println(responseContent);
+                response.put("content", responseContent);
+            }
             response.put("status", httpResponse.getStatusLine().getStatusCode());
             return response;
         } catch (IOException e) {
@@ -96,5 +126,18 @@ public class ApiRequest {
         }
 
     }
-
+    private boolean isJSONValid(String test) {
+        try {
+            new JSONObject(test);
+        } catch (JSONException ex) {
+            // edited, to include @Arthur's comment
+            // e.g. in case JSONArray is valid as well...
+            try {
+                new JSONArray(test);
+            } catch (JSONException ex1) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

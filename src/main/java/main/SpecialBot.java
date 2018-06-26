@@ -12,8 +12,6 @@ import utils.LoggerUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class SpecialBot {
 
@@ -29,7 +27,6 @@ public class SpecialBot {
     public void setupClient(String client_id) {
         setupGuildOptions();
         updatePresence();
-        setupReboot();
 
         if (client.getGuilds().size() == 0) {
             LoggerUtil.CRITICAL("You need to add this bot to a server. Use the link below:");
@@ -84,17 +81,6 @@ public class SpecialBot {
         }catch(DiscordException e){
             LoggerUtil.WARNING("Failed to update avatar, rate limited by discord");
         }
-    }
-
-    private void setupReboot(){//TODO: There has to be a better way to do all of this, this seems like it isn't nearly safe enough -- PROPAGATE TO .UPDATE
-        Executors.newSingleThreadScheduledExecutor().schedule(()-> {
-            getClient().logout();
-            try {
-                Runtime.getRuntime().exec("sudo reboot");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }, 24, TimeUnit.HOURS);
     }
 
     public boolean joinVoiceChannel(IChannel channel) {

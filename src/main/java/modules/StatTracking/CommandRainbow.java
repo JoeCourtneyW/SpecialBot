@@ -12,7 +12,7 @@ import utils.http.UrlUtil;
 public class CommandRainbow implements CommandExecutor {
 
     @Command(label = "rainbow")
-    public void fortnite(CommandEvent event) {
+    public void rainbow(CommandEvent event) {
         if (event.getArgs().length == 0) {
             event.reply("You must enter a username to search");
             return;

@@ -10,4 +10,5 @@ public class Credentials {
     public String GOOGLE_API_KEY;
     public String BITLY_KEY;
     public String TRN_API_KEY;
+    public String PASTEBIN_API_KEY;
 }
