@@ -51,7 +51,6 @@ public class CommandOptions implements CommandExecutor {
                 event.reply("*Incorrect input value for the given option, make sure you're using the right data type!*");
                 return;
             }
-            selectedOption
             bot.getGuildOptions(event.getGuild());
 
         }
