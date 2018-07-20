@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Downloader {
+
     private Music music;
     private ExecutorService downloadThreads;
 
@@ -82,15 +83,16 @@ public class Downloader {
             return;
         }
         if (!isDownloaded(song)) {
-                String url = "http://youtu.be/" + song.ID;
-                try {
-                    Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url, null, music.getMusicDirectory());
-                    LoggerUtil.DEBUG("Downloading youtube mp3 from " + url);
-                    p.waitFor();
-                    LoggerUtil.DEBUG("File downloaded");
-                } catch (IOException | InterruptedException e) {
-                    LoggerUtil.CRITICAL("Exception while trying to download youtube url:" + url);
-                }
+            String url = "http://youtu.be/" + song.ID;
+            try {
+                Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url,
+                                                      null, music.getMusicDirectory());
+                LoggerUtil.DEBUG("Downloading youtube mp3 from " + url);
+                p.waitFor();
+                LoggerUtil.DEBUG("File downloaded");
+            } catch (IOException | InterruptedException e) {
+                LoggerUtil.CRITICAL("Exception while trying to download youtube url:" + url);
+            }
         }
     }
 

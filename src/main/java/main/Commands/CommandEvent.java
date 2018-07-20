@@ -10,6 +10,7 @@ import sx.blah.discord.handle.obj.IUser;
 import java.util.StringJoiner;
 
 public class CommandEvent {
+
     private SpecialBot bot;
     private Command command;
     private IGuild guild;
@@ -53,35 +54,41 @@ public class CommandEvent {
     public String[] getArgs() {
         return args;
     }
-    public String getUsageMessage(){
+
+    public String getUsageMessage() {
         return "Usage: " + command.usage();
     }
-    public void reply(String reply){
+
+    public void reply(String reply) {
         bot.sendChannelMessage(reply, channel);
     }
-    public void reply(EmbedObject reply){
+
+    public void reply(EmbedObject reply) {
         bot.sendEmbed(reply, channel);
     }
-    public String getArgsAsString(int startIndex){
+
+    public String getArgsAsString(int startIndex) {
         StringJoiner name = new StringJoiner(" ");
         for (int i = startIndex; i < args.length; i++) {
             name.add(args[i]);
         }
         return name.toString();
     }
-    public boolean isInteger(String argument){
-        try{
+
+    public boolean isInteger(String argument) {
+        try {
             Integer.parseInt(argument);
             return true;
-        } catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             return false;
         }
     }
-    public boolean isDouble(String argument){
-        try{
+
+    public boolean isDouble(String argument) {
+        try {
             Double.parseDouble(argument);
             return true;
-        } catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             return false;
         }
     }

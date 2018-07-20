@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class MusicCommands implements CommandExecutor {
     private Music music = Music.instance;
@@ -134,11 +133,9 @@ public class MusicCommands implements CommandExecutor {
     @Command(label = "disconnect", description = "Remove the bot from the channel")
     public void disconnect(CommandEvent event) {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
-
-        Optional<IVoiceChannel> iVoiceChannelOptional = bot.getClient().getConnectedVoiceChannels().stream()
-                .filter(iVoiceChannel -> iVoiceChannel.getGuild().getStringID().equalsIgnoreCase(event.getGuild().getStringID()))
-                .findFirst();
-        if (iVoiceChannelOptional.isPresent()) {
+        IVoiceChannel channel = event.getGuild().getConnectedVoiceChannel();
+        if (channel != null) {
+            channel.leave();
             event.reply("**Left Voice Channel**");
         } else {
             event.reply("*I am not currently in a voice channel*");

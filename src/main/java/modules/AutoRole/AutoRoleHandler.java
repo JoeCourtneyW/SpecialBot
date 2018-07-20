@@ -7,6 +7,7 @@ import sx.blah.discord.handle.impl.events.guild.member.UserRoleUpdateEvent;
 import sx.blah.discord.handle.obj.IRole;
 
 public class AutoRoleHandler {
+
     private SpecialBot bot;
 
     public AutoRoleHandler(SpecialBot bot) {
@@ -28,11 +29,11 @@ public class AutoRoleHandler {
     }
 
     @EventSubscriber
-    public void onUserRoleUpdate(UserRoleUpdateEvent event){
+    public void onUserRoleUpdate(UserRoleUpdateEvent event) {
         String roleId = bot.getGuildOptions(event.getGuild()).DEFAULT_ROLE;
-        if(!roleId.isEmpty()) {
+        if (!roleId.isEmpty()) {
             IRole defaultRole = event.getClient().getRoleByID(Long.parseLong(roleId));
-            if(event.getOldRoles().contains(defaultRole)){
+            if (event.getOldRoles().contains(defaultRole)) {
                 event.getNewRoles().remove(defaultRole);
             }
         }

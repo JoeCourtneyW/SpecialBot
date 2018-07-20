@@ -21,7 +21,8 @@ public class MiscCommands implements CommandExecutor {
         int status = response.get("status").asInt();
         String quote = StringEscapeUtils.unescapeHtml4(response.get("content").get(0).get("content").asText());
         if (status == 200) //Trimming five chars from quote length for "\n" & "<p>" from html content
-            event.reply("*\"" + quote.substring(3, quote.length() - 6).trim() + "\"* - " + response.get("content").get(0).get("title").asText());
+            event.reply("*\"" + quote.substring(3, quote.length() - 6).trim() + "\"* - " + response.get("content").get(
+                    0).get("title").asText());
         else
             throw new HttpException("Quote website error: Status code:" + status);
 
@@ -59,7 +60,7 @@ public class MiscCommands implements CommandExecutor {
         }
         try {
             event.getChannel().getMessageHistory(count + 1).bulkDelete();
-        } catch(RateLimitException e){
+        } catch (RateLimitException e) {
             event.reply("*Slow down, you've been ratelimited!*");
             return;
         }

@@ -12,6 +12,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 
 public class MusicHandler {
+
     private SpecialBot bot;
 
     public MusicHandler(SpecialBot bot) {
@@ -28,25 +29,26 @@ public class MusicHandler {
     }
 
     @EventSubscriber
-    public void onSkipNext(TrackSkipEvent event) throws UnsupportedAudioFileException, IOException  {
+    public void onSkipNext(TrackSkipEvent event) throws UnsupportedAudioFileException, IOException {
         IGuild guild = event.getPlayer().getGuild();
         Music.instance.getAudioPlayer(guild).next();
     }
 
     //NON DISCORD4J HANDLERS
-    public void onQueue(IGuild guild, Playlist playlist){
-            bot.sendChannelMessage("Added **" + playlist.NAME + "** to the queue. *(" + playlist.SONGS.size() + " songs)*",
-                    Music.instance.getAudioPlayer(guild).getLastChannel());
+    public void onQueue(IGuild guild, Playlist playlist) {
+        bot.sendChannelMessage("Added **" + playlist.NAME + "** to the queue. *(" + playlist.SONGS.size() + " songs)*",
+                               Music.instance.getAudioPlayer(guild).getLastChannel());
     }
-    public void onQueue(IGuild guild, Song song){
-        if(Music.instance.getAudioPlayer(guild).getPlaying() != null) {
+
+    public void onQueue(IGuild guild, Song song) {
+        if (Music.instance.getAudioPlayer(guild).getPlaying() != null) {
             bot.sendChannelMessage("Added **" + song.TITLE + "** to the queue.",
-                    Music.instance.getAudioPlayer(guild).getLastChannel());
+                                   Music.instance.getAudioPlayer(guild).getLastChannel());
         }
     }
 
-    public void onStart(IGuild guild, Song song){
+    public void onStart(IGuild guild, Song song) {
         bot.sendChannelMessage("Now playing **" + song.TITLE + "**.",
-                Music.instance.getAudioPlayer(guild).getLastChannel());
+                               Music.instance.getAudioPlayer(guild).getLastChannel());
     }
 }

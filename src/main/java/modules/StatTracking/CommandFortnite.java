@@ -11,9 +11,9 @@ import utils.http.UrlUtil;
 
 public class CommandFortnite implements CommandExecutor {
 
-    @Command(label="fortnite")
-    public void fortnite(CommandEvent event){
-        if(event.getArgs().length == 0){
+    @Command(label = "fortnite")
+    public void fortnite(CommandEvent event) {
+        if (event.getArgs().length == 0) {
             event.reply("You must enter a username to search");
             return;
         }
@@ -23,18 +23,19 @@ public class CommandFortnite implements CommandExecutor {
                 .addHeader("TRN-Api-Key", Main.CREDENTIALS.TRN_API_KEY);
         StatTracking.instance.fortniteRequestPool.offer(() -> {
             JsonNode response = request.get();
-            if(response.get("status").asInt() != 200){
+            if (response.get("status").asInt() != 200) {
                 event.reply("Player not found! They may not have an Epic Account set up");
                 return;
             }
             EmbedBuilder embed = new EmbedBuilder()
                     .withTitle(response.get("content").get("epicUserHandle").asText())
                     .withThumbnail("https://fortniteskins.net/wp-content/uploads/2018/03/tracker-outfit.png")
-                    .withUrl("https://fortnitetracker.com/profile/pc/" + response.get("content").get("epicUserHandle").asText());
+                    .withUrl("https://fortnitetracker.com/profile/pc/" + response.get("content").get(
+                            "epicUserHandle").asText());
 
             JsonNode lifetimeStats = response.get("content").get("lifeTimeStats");
-            for(JsonNode stat : lifetimeStats){
-                if(!stat.get("key").asText().contains("Top"))
+            for (JsonNode stat : lifetimeStats) {
+                if (!stat.get("key").asText().contains("Top"))
                     embed.appendField(stat.get("key").asText(), stat.get("value").asText(), true);
             }
 

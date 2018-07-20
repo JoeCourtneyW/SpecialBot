@@ -6,6 +6,7 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.util.EmbedBuilder;
 
 public class SteamGame {
+
     public String APPID;
     public String NAME;
     public boolean FREE;
@@ -68,11 +69,12 @@ public class SteamGame {
         embed.withUrl(steamLink());
         return embed.build();
     }
-    public String formattedPrice(){
+
+    public String formattedPrice() {
         if (!FREE) {
             if (DISCOUNT_PERCENT != 0)
                 return "~~$" + INITIAL_PRICE + "~~ **$" + FINAL_PRICE + "**";
-             else
+            else
                 return "$" + FINAL_PRICE;
         } else {
             return "**Free!**";

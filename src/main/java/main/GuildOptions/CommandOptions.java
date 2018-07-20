@@ -24,31 +24,33 @@ public class CommandOptions implements CommandExecutor {
             guildOptions.add(annotation);
         }
 
-        if(event.getArgs().length <= 1){
+        if (event.getArgs().length <= 1) {
             event.reply("Options: [" + optionList.toString() + "]");
             return;
         }
 
-        if(event.getArgs().length >= 2){
-            Modifiable selectedOption = guildOptions.stream().filter(option -> option.name().equalsIgnoreCase(event.getArgs()[0])).findFirst().orElse(null);
+        if (event.getArgs().length >= 2) {
+            Modifiable selectedOption = guildOptions.stream().filter(
+                    option -> option.name().equalsIgnoreCase(event.getArgs()[0])).findFirst().orElse(null);
 
-            if(selectedOption == null){
+            if (selectedOption == null) {
                 event.reply("Options: [" + optionList.toString() + "]");
                 return;
             }
             String newOptionValue = "";
-            if(validateInput(event, selectedOption)){
-                if(selectedOption.validation() == Modifiable.InputType.ROLE_MENTION){
+            if (validateInput(event, selectedOption)) {
+                if (selectedOption.validation() == Modifiable.InputType.ROLE_MENTION) {
                     newOptionValue = event.getMessage().getRoleMentions().get(0).getStringID();
-                }else if(selectedOption.validation() == Modifiable.InputType.USER_MENTION){
+                } else if (selectedOption.validation() == Modifiable.InputType.USER_MENTION) {
                     newOptionValue = event.getMessage().getMentions().get(0).getStringID();
-                }else if(selectedOption.validation() == Modifiable.InputType.CHANNEL_MENTION){
+                } else if (selectedOption.validation() == Modifiable.InputType.CHANNEL_MENTION) {
                     newOptionValue = event.getMessage().getChannelMentions().get(0).getStringID();
                 } else {
                     newOptionValue = event.getArgsAsString(1);
                 }
             } else {
-                event.reply("*Incorrect input value for the given option, make sure you're using the right data type!*");
+                event.reply(
+                        "*Incorrect input value for the given option, make sure you're using the right data type!*");
                 return;
             }
             bot.getGuildOptions(event.getGuild());
@@ -57,15 +59,15 @@ public class CommandOptions implements CommandExecutor {
 
     }
 
-    private boolean validateInput(CommandEvent event, Modifiable annotation){
-        switch(annotation.validation()){
+    private boolean validateInput(CommandEvent event, Modifiable annotation) {
+        switch (annotation.validation()) {
             case STRING:
                 return true;
             case INTEGER:
-                try{
+                try {
                     Integer.parseInt(event.getArgs()[1]);
                     return true;
-                } catch(Exception e) {
+                } catch (Exception e) {
                     return false;
                 }
             case ROLE_MENTION:
@@ -73,10 +75,10 @@ public class CommandOptions implements CommandExecutor {
             case USER_MENTION:
                 return event.getMessage().getMentions().size() > 0;
             case BOOLEAN:
-                try{
+                try {
                     Boolean.parseBoolean(event.getArgs()[1]);
                     return true;
-                } catch(Exception e) {
+                } catch (Exception e) {
                     return false;
                 }
             default:

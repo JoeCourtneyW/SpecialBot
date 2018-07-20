@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class Main {
+
     public static Credentials CREDENTIALS;
     public final static String DIR = System.getProperty("user.dir");
 
@@ -39,8 +40,10 @@ public class Main {
         }
 
         bot = login();
-        bot.getClient().getDispatcher().registerListener(new Main()); //Waits for ready event to initialize modules and such
-        bot.registerCommands(new CommandUpdate(), new CommandOptions()); //Leave the command update while the bot is still developing
+        bot.getClient().getDispatcher().registerListener(
+                new Main()); //Waits for ready event to initialize modules and such
+        bot.registerCommands(new CommandUpdate(),
+                             new CommandOptions()); //Leave the command update while the bot is still developing
     }
 
     private static SpecialBot login() {
@@ -72,6 +75,7 @@ public class Main {
 
     /**
      * @param credentialsFile the JSON file that contains the credentials
+     *
      * @return A Credentials object
      */
     private static Credentials loadCredentials(File credentialsFile) {

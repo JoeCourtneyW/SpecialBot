@@ -19,6 +19,7 @@ public class CommandUpdate implements CommandExecutor {
             }
         }
     }
+
     @Command(label = "logout", adminOnly = true)
     public void onLogout(CommandEvent event) {
         if (event.getAuthor().getStringID().equalsIgnoreCase("107131529318117376")) { //SlyBro3#8695

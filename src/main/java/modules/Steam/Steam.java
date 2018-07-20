@@ -47,6 +47,7 @@ public class Steam implements SpecialModule {
 
     /**
      * @param query What to look up
+     *
      * @return The steamgame object that best matches the query
      */
     @Nullable
@@ -88,10 +89,10 @@ public class Steam implements SpecialModule {
         return SteamGame.buildFromAppDetails(response.get("content").get(appid).get("data"));
     }
 
-    private void startApiPoll(){
+    private void startApiPoll() {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            for(IGuild guild : bot.getClient().getGuilds()){
-                for(int i = 0; i < bot.getGuildOptions(guild).WISHLIST.size(); i++){
+            for (IGuild guild : bot.getClient().getGuilds()) {
+                for (int i = 0; i < bot.getGuildOptions(guild).WISHLIST.size(); i++) {
                     SteamGame game = bot.getGuildOptions(guild).WISHLIST.get(i);
                     SteamGame updated_game = getAppDetails(game.APPID);
 

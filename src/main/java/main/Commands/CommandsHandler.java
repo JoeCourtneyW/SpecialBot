@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class CommandsHandler {
+
     private SpecialBot bot;
     private HashMap<Command, Method> commands = new HashMap<>();
 
@@ -35,7 +36,7 @@ public class CommandsHandler {
 
         if (message.getContent().equalsIgnoreCase(prefix)) {
             bot.sendChannelMessage("Type '" + prefix + "help' to show a list of commands",
-                    message.getChannel());
+                                   message.getChannel());
             return;
         }
         String[] split = message.getContent().split(" ");
@@ -45,31 +46,35 @@ public class CommandsHandler {
 
         for (Command ca : commands.keySet()) {
             if (ca.label().equalsIgnoreCase(commandLabel) || ca.alias().equalsIgnoreCase(commandLabel)) {
-                if (!ca.adminOnly() || (ca.adminOnly() && event.getAuthor().getPermissionsForGuild(event.getGuild()).contains(Permissions.ADMINISTRATOR))) { //If the command is for everyone or the command is adminOnly and the user is an admin in the given guild
+                if (!ca.adminOnly() || (ca.adminOnly() && event.getAuthor().getPermissionsForGuild(
+                        event.getGuild()).contains(
+                        Permissions.ADMINISTRATOR))) { //If the command is for everyone or the command is adminOnly and the user is an admin in the given guild
                     try {
                         Method commandMethod = commands.get(ca);
                         commandMethod.setAccessible(true);
                         CommandExecutor declaringClassInstance = (CommandExecutor) commandMethod.getDeclaringClass()
                                 .getConstructor().newInstance(); //Creates new instance of commandexecutor class with required constructor
-                        commandMethod.invoke(declaringClassInstance, new CommandEvent(bot, ca,//Invokes command method with CommandEvent arg
-                                event.getGuild(),
-                                event.getChannel(),
-                                event.getAuthor(),
-                                event.getMessage(),
-                                commandLabel, args));
+                        commandMethod.invoke(declaringClassInstance,
+                                             new CommandEvent(bot, ca,//Invokes command method with CommandEvent arg
+                                                              event.getGuild(),
+                                                              event.getChannel(),
+                                                              event.getAuthor(),
+                                                              event.getMessage(),
+                                                              commandLabel, args));
                     } catch (Exception e) {
                         bot.sendChannelMessage("**An error occured,** *Contact an administrator*",
-                                message.getChannel());
+                                               message.getChannel());
                         e.printStackTrace();
                     }
                 } else {
-                    bot.sendChannelMessage("**You don't have permission to execute this command!**", message.getChannel());
+                    bot.sendChannelMessage("**You don't have permission to execute this command!**",
+                                           message.getChannel());
                 }
                 return;
             }
 
         }
         bot.sendChannelMessage("Type '" + prefix + "help' to show a list of commands",
-                message.getChannel());
+                               message.getChannel());
     }
 }

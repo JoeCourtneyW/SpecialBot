@@ -25,7 +25,7 @@ public class SpecialAudioPlayer {
     private Song playing;
     private Queue<Song> songQueue;
     private Queue<Song> songHistory;
-    private final int limit = 25;
+    private static final int limit = 25;
 
     private LoopState loopState = LoopState.OFF;
 
@@ -171,6 +171,7 @@ public class SpecialAudioPlayer {
 
     public void setLastChannel(IChannel channel) {
         this.lastChannel = channel;
+        this.lastAction = System.currentTimeMillis();
     }
 
     public void setLoopState(LoopState loopState) {

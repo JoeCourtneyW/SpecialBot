@@ -47,6 +47,7 @@ public class SpecialBot {
         this.commandsHandler = new CommandsHandler(this);
         getClient().getDispatcher().registerListener(commandsHandler);
     }
+
     public void loadModule(SpecialModule module) {
         if (module.onLoad()) {
             LoggerUtil.INFO("[Module] Enabled \"" + module.getName() + "\" V" + module.getVersion());
@@ -54,6 +55,7 @@ public class SpecialBot {
             LoggerUtil.WARNING("[Module] \"" + module.getName() + "\" has failed to load.");
         }
     }
+
     public void registerHandlers(Object... handlers) {
         for (Object handler : handlers)
             client.getDispatcher().registerListener(handler);
@@ -64,7 +66,7 @@ public class SpecialBot {
             commandsHandler.registerCommand(executor);
     }
 
-    private void updatePresence(){
+    private void updatePresence() {
         String version = Main.getProjectVersion();
 
         client.changeUsername("Special Boi");
@@ -78,13 +80,14 @@ public class SpecialBot {
             } else {
                 LoggerUtil.WARNING("Failed to load avatar image for discord user: No avatar.png file found");
             }
-        }catch(DiscordException e){
+        } catch (DiscordException e) {
             LoggerUtil.WARNING("Failed to update avatar, rate limited by discord");
         }
     }
 
     public boolean joinVoiceChannel(IChannel channel) {
-        IVoiceChannel voiceChannel = channel.getGuild().getVoiceChannelByID(channel.getLongID()); //Convert IChannel given by user into a voice channel
+        IVoiceChannel voiceChannel = channel.getGuild().getVoiceChannelByID(
+                channel.getLongID()); //Convert IChannel given by user into a voice channel
         if (!voiceChannel.getModifiedPermissions(getClient().getOurUser()).contains(Permissions.VOICE_CONNECT))
             return false;
         else if (voiceChannel.getConnectedUsers().size() >= voiceChannel.getUserLimit() && voiceChannel.getUserLimit() > 0)
@@ -103,28 +106,29 @@ public class SpecialBot {
         } catch (DiscordException e) {
             LoggerUtil.CRITICAL("Discord Exception: " + e.getErrorMessage());
         } catch (MissingPermissionsException e) {
-            LoggerUtil.CRITICAL("The bot does not have permission to chat in this channel! [#" + builder.getChannel().getName() + "]");
+            LoggerUtil.CRITICAL(
+                    "The bot does not have permission to chat in this channel! [#" + builder.getChannel().getName() + "]");
         }
         return null;
     }
 
     public IMessage sendChannelMessage(String message, IChannel channel) {
         return sendMessage(new MessageBuilder(client)
-                .appendContent(message)
-                .withChannel(channel));
+                                   .appendContent(message)
+                                   .withChannel(channel));
     }
 
     public IMessage sendEmbed(EmbedObject embed, IChannel channel) {
         return sendMessage(new MessageBuilder(client)
-                .withEmbed(embed)
-                .withChannel(channel));
+                                   .withEmbed(embed)
+                                   .withChannel(channel));
     }
 
     public IMessage sendPrivateMessage(String message, IUser user) {
         IPrivateChannel pc = client.getOrCreatePMChannel(user);
         return sendMessage(new MessageBuilder(client)
-                .appendContent(message)
-                .withChannel(pc));
+                                   .appendContent(message)
+                                   .withChannel(pc));
     }
 
     /*Format options for chat messages, just for reference
@@ -139,7 +143,6 @@ public class SpecialBot {
 		CODE_BLOCK("`"),
 		MULTI_LINE_CODE_BLOCK("```");
      */
-
 
 
     private void setupGuildOptions() {
@@ -169,7 +172,8 @@ public class SpecialBot {
     }
 
     public GuildOptions getGuildOptions(IGuild guild) {
-        return (GuildOptions) JsonUtil.getJavaObject(new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
+        return (GuildOptions) JsonUtil.getJavaObject(
+                new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
     }
 
     private static Credentials loadCredentials(File credentialsFile) {

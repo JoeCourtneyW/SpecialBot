@@ -5,8 +5,11 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Modifiable {
+
     String name();
+
     String description() default "Unconfigured";
+
     InputType validation();
 
     enum InputType {

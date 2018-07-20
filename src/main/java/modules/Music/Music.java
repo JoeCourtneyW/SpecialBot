@@ -14,9 +14,9 @@ import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 public class Music implements SpecialModule {
+
     static Music instance;
 
     private YouTube youtube;
@@ -34,7 +34,8 @@ public class Music implements SpecialModule {
         youtubeWrapper = new YoutubeWrapper(this);
         downloader = new Downloader(this);
         bot.registerCommands(new MusicCommands()); //Make sure commands and handlers are both at the end of the onLoad
-        bot.registerHandlers((musicHandler = new MusicHandler(bot))); //method to ensure the other classes are available to them
+        bot.registerHandlers(
+                (musicHandler = new MusicHandler(bot))); //method to ensure the other classes are available to them
         for (IGuild g : bot.getClient().getGuilds()) {
             audioPlayers.put(g, new SpecialAudioPlayer(bot, g));
         }
@@ -57,18 +58,17 @@ public class Music implements SpecialModule {
         }).setApplicationName("Special Bot").build();
     }
 
-    private void startTimeoutTimer() {//TODO: Fix
+    private void startTimeoutTimer() {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            Stream<IVoiceChannel> voiceChannelStream;
+            IVoiceChannel voiceChannel;
             for (IGuild guild : bot.getClient().getGuilds()) {
-                voiceChannelStream = guild.getVoiceChannels().stream();
-                if (voiceChannelStream.anyMatch(IVoiceChannel::isConnected)) {
-                    if (System.currentTimeMillis() - getAudioPlayer(guild).getLastAction() > 1000 * 60 * 30) {//If it's been 30 minutes since the last bot action
-                        voiceChannelStream.filter(IVoiceChannel::isConnected).limit(1).findFirst().orElse(null).leave(); //Hecking cool streams dude
-                    }
+                voiceChannel = guild.getConnectedVoiceChannel();
+                if (voiceChannel != null && System.currentTimeMillis() - getAudioPlayer(
+                        guild).getLastAction() > 1000 * 60 * 30) {//If it's been 30 minutes since the last bot action
+                    voiceChannel.leave();
                 }
             }
-        }, 15, 15, TimeUnit.MINUTES);
+        }, 30, 15, TimeUnit.MINUTES);
     }
 
     public SpecialAudioPlayer getAudioPlayer(IGuild guild) {

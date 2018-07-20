@@ -1,6 +1,7 @@
 package main;
 
 public class Credentials {
+
     public String PERSONAL_TOKEN;
     public String CLIENT_ID;
     public String REDDIT_USER;

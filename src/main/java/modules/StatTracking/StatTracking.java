@@ -14,7 +14,7 @@ public class StatTracking implements SpecialModule {
 
     public RequestPool fortniteRequestPool;
 
-    public boolean onLoad(){
+    public boolean onLoad() {
         instance = this;
 
         fortniteRequestPool = new RequestPool(2);
@@ -24,10 +24,11 @@ public class StatTracking implements SpecialModule {
         return true;
     }
 
-    public String getName(){
+    public String getName() {
         return "Stat Tracking";
     }
-    public String getVersion(){
+
+    public String getVersion() {
         return "1.0";
     }
 }

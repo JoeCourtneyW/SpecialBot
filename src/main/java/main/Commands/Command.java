@@ -4,15 +4,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public  @interface Command {
+public @interface Command {
 
-	 String label();
-	
-	 String usage() default ".command";
+    String label();
 
-	 String description() default "Unconfigured Command";
-	 
-	 String alias() default "";
+    String usage() default ".command";
 
-	 boolean adminOnly() default false;
+    String description() default "Unconfigured Command";
+
+    String alias() default "";
+
+    boolean adminOnly() default false;
 }
