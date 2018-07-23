@@ -80,7 +80,7 @@ public class SpecialAudioPlayer {
     public void queueSong(Song song) {
         Music.instance.getDownloader().getDownloadThreads().submit(() -> {
             if (!Downloader.isDownloaded(song)) {
-                Music.instance.getBot().sendChannelMessage("Downloading song...", lastChannel);
+                Music.instance.getBot().sendChannelMessage("**Downloading song...**", lastChannel);
                 Music.instance.getDownloader().download(song);
             }
             Music.instance.getMusicHandler().onQueue(guild, song);
@@ -98,7 +98,8 @@ public class SpecialAudioPlayer {
     public void queuePlaylist(Playlist playlist) {
         Music.instance.getDownloader().getDownloadThreads().submit(() -> {
             if(!playlist.SONGS.stream().allMatch(Downloader::isDownloaded)){ //TODO: Add counter in message that updates the amount of songs downloaded out of total
-                Music.instance.getBot().sendChannelMessage("Downloading songs, This may take a second...", lastChannel);
+                Music.instance.getBot().sendChannelMessage("**Downloading songs, This may take a second...**",
+                                                           lastChannel);
             }
             for (Song song : playlist) {
                 if (!Downloader.isDownloaded(song)) {

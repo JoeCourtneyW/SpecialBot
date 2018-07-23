@@ -32,7 +32,7 @@ public class CommandNSFW implements CommandExecutor {
             try {
                 period = TimePeriod.valueOf(event.getArgs()[1].toUpperCase());
             } catch (IllegalArgumentException e) {
-                event.reply("Invalid time period, options: <ALL, YEAR, MONTH, WEEK, DAY>");
+                event.reply("*Invalid time period, options: <ALL, YEAR, MONTH, WEEK, DAY>*");
                 return;
             }
         } else if (event.getArgs().length == 1) {
@@ -40,14 +40,14 @@ public class CommandNSFW implements CommandExecutor {
         } else if (event.getArgs().length == 0) {
             search = defaultSubreddit;
         } else {
-            event.reply("Incorrect usage: .nsfw [subreddit name] <ALL, YEAR, MONTH, WEEK, DAY>");
+            event.reply("*Incorrect usage: .nsfw [subreddit name] <ALL, YEAR, MONTH, WEEK, DAY>*");
             return;
         }
 
         try {
             Reddit.reddit.subreddit(search).about();
         } catch (NullPointerException e) {
-            event.reply("That subreddit does not exist!");
+            event.reply("*That subreddit does not exist!*");
             return;
         }
 

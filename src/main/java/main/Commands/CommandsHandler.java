@@ -35,7 +35,7 @@ public class CommandsHandler {
             return;
 
         if (message.getContent().equalsIgnoreCase(prefix)) {
-            bot.sendChannelMessage("Type '" + prefix + "help' to show a list of commands",
+            bot.sendChannelMessage("*Type '" + prefix + "help' to show a list of commands" + "*",
                                    message.getChannel());
             return;
         }
@@ -62,19 +62,19 @@ public class CommandsHandler {
                                                               event.getMessage(),
                                                               commandLabel, args));
                     } catch (Exception e) {
-                        bot.sendChannelMessage("**An error occured,** *Contact an administrator*",
+                        bot.sendChannelMessage("*An unexpected error has occured*",
                                                message.getChannel());
                         e.printStackTrace();
                     }
                 } else {
-                    bot.sendChannelMessage("**You don't have permission to execute this command!**",
+                    bot.sendChannelMessage("*You don't have permission to execute this command!*",
                                            message.getChannel());
                 }
                 return;
             }
 
         }
-        bot.sendChannelMessage("Type '" + prefix + "help' to show a list of commands",
+        bot.sendChannelMessage("*Type '" + prefix + "help' to show a list of commands*",
                                message.getChannel());
     }
 }

@@ -14,6 +14,6 @@ public class AutoRole implements SpecialModule {
     }
 
     public String getVersion() {
-        return "1.0";
-    }
+        return "1.1";
+    } //Finally 1.1 fixes the remove default role on update bug
 }

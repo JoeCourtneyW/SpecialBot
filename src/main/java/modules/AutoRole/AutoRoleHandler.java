@@ -34,7 +34,7 @@ public class AutoRoleHandler {
         if (!roleId.isEmpty()) {
             IRole defaultRole = event.getClient().getRoleByID(Long.parseLong(roleId));
             if (event.getOldRoles().contains(defaultRole)) {
-                event.getNewRoles().remove(defaultRole);
+                event.getUser().removeRole(defaultRole);
             }
         }
     }

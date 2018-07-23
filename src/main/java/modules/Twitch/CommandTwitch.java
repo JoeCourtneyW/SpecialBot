@@ -14,7 +14,7 @@ public class CommandTwitch implements CommandExecutor {
     @Command(label = "twitch")
     public static void onTwitch(CommandEvent event) {
         if(event.getArgs().length < 1){
-            event.reply("Enter a streamer's name as the first argument");
+            event.reply("*Enter a streamer's name as the first argument*");
             return;
         }
 
@@ -24,7 +24,7 @@ public class CommandTwitch implements CommandExecutor {
                 .get();
 
         if(response.get("status").asInt() != 200) {
-            event.reply("Streamer not found");
+            event.reply("*Streamer not found*");
             return;
         }
 

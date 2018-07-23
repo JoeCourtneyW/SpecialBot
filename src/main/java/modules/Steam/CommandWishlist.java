@@ -11,7 +11,7 @@ public class CommandWishlist implements CommandExecutor {
     @Command(label = "wishlist")
     public void wishlist(CommandEvent event) {
         if (event.getArgs().length < 1) {
-            event.reply("Enter an argument [add, remove, list]");
+            event.reply("*Enter an argument [add, remove, list]*");
             return;
         }
         if (event.getArgs()[0].equalsIgnoreCase("add")) {
@@ -19,7 +19,7 @@ public class CommandWishlist implements CommandExecutor {
             Steam.searchService.submit(() -> {
                 SteamGame steamGame = Steam.searchForGame(query);
                 if (steamGame == null) {
-                    event.reply("No results found for the given query");
+                    event.reply("*No results found for the given query*");
                     return;
                 }
 
@@ -34,7 +34,7 @@ public class CommandWishlist implements CommandExecutor {
             Steam.searchService.submit(() -> {
                 SteamGame steamGame = Steam.searchForGame(query);
                 if (steamGame == null) {
-                    event.reply("No results found for the given query");
+                    event.reply("*No results found for the given query*");
                     return;
                 }
                 GuildOptions options = bot.getGuildOptions(event.getGuild());
@@ -59,7 +59,7 @@ public class CommandWishlist implements CommandExecutor {
 
             bot.sendEmbed(embed.build(), event.getChannel());
         } else {
-            event.reply("Enter an argument [add, remove, list]");
+            event.reply("*Enter an argument [add, remove, list]*");
         }
     }
 }

@@ -13,7 +13,8 @@ public class CommandUpdate implements CommandExecutor {
         if (event.getAuthor().getStringID().equalsIgnoreCase("107131529318117376")) { //SlyBro3#8695
             bot.getClient().logout();
             try {
-                Runtime.getRuntime().exec("sudo reboot");
+                Runtime.getRuntime().exec("sudo reboot"); //Really shoddy way to update,
+                // it basically just resets the box to call an update script on startup
             } catch (IOException e) {
                 e.printStackTrace();
             }

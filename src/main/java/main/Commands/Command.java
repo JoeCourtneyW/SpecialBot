@@ -10,7 +10,7 @@ public @interface Command {
 
     String usage() default ".command";
 
-    String description() default "Unconfigured Command";
+    String description() default "This command does not yet have a description";
 
     String alias() default "";
 

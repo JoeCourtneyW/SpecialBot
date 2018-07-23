@@ -35,8 +35,6 @@ public class SpecialBot {
             return;
         }
 
-        client.getConnectedVoiceChannels().forEach(IVoiceChannel::leave);
-
     }
 
     public IDiscordClient getClient() {
@@ -50,9 +48,9 @@ public class SpecialBot {
 
     public void loadModule(SpecialModule module) {
         if (module.onLoad()) {
-            LoggerUtil.INFO("[Module] Enabled \"" + module.getName() + "\" V" + module.getVersion());
+            LoggerUtil.INFO("[Modules] Enabled \"" + module.getName() + "\" V" + module.getVersion());
         } else {
-            LoggerUtil.WARNING("[Module] \"" + module.getName() + "\" has failed to load.");
+            LoggerUtil.WARNING("[Modules] \"" + module.getName() + "\" has failed to load.");
         }
     }
 
@@ -174,9 +172,5 @@ public class SpecialBot {
     public GuildOptions getGuildOptions(IGuild guild) {
         return (GuildOptions) JsonUtil.getJavaObject(
                 new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
-    }
-
-    private static Credentials loadCredentials(File credentialsFile) {
-        return (Credentials) JsonUtil.getJavaObject(credentialsFile, Credentials.class);
     }
 }

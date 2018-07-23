@@ -41,7 +41,7 @@ public class MiscCommands implements CommandExecutor {
                 .get();
         int status = response.asInt();
         if (status == 200)
-            event.reply("Shortened Link: " + response.get("content").get("data").get("url").asText());
+            event.reply("Shortened Link: **" + response.get("content").get("data").get("url").asText() + "**");
         else
             throw new HttpException("Link Shorten error: Status code:" + status);
 

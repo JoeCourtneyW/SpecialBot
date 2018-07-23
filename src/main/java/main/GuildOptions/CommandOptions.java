@@ -25,7 +25,7 @@ public class CommandOptions implements CommandExecutor {
         }
 
         if (event.getArgs().length <= 1) {
-            event.reply("Options: [" + optionList.toString() + "]");
+            event.reply("*Options: [" + optionList.toString() + "]*");
             return;
         }
 
@@ -34,7 +34,7 @@ public class CommandOptions implements CommandExecutor {
                     option -> option.name().equalsIgnoreCase(event.getArgs()[0])).findFirst().orElse(null);
 
             if (selectedOption == null) {
-                event.reply("Options: [" + optionList.toString() + "]");
+                event.reply("*Options: [" + optionList.toString() + "]*");
                 return;
             }
             String newOptionValue = "";
@@ -74,6 +74,8 @@ public class CommandOptions implements CommandExecutor {
                 return event.getMessage().getRoleMentions().size() > 0;
             case USER_MENTION:
                 return event.getMessage().getMentions().size() > 0;
+            case CHANNEL_MENTION:
+                return event.getMessage().getChannelMentions().size() > 0;
             case BOOLEAN:
                 try {
                     Boolean.parseBoolean(event.getArgs()[1]);

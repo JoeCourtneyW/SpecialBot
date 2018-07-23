@@ -10,14 +10,14 @@ public class CommandSearch implements CommandExecutor {
     public void onSearch(CommandEvent event) {
         String query = event.getArgsAsString(0).trim();
         if (query.isEmpty()) {
-            event.reply("You must enter a search term");
+            event.reply("*You must enter a search term*");
             return;
         }
 
         Steam.searchService.submit(() -> {
             SteamGame steamGame = Steam.searchForGame(query);
             if (steamGame == null) {
-                event.reply("No results found");
+                event.reply("*No results found*");
                 return;
             }
             event.reply(steamGame.buildEmbed());

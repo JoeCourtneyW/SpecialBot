@@ -24,7 +24,7 @@ public class CommandFortnite implements CommandExecutor {
         StatTracking.instance.fortniteRequestPool.offer(() -> {
             JsonNode response = request.get();
             if (response.get("status").asInt() != 200) {
-                event.reply("Player not found! They may not have an Epic Account set up");
+                event.reply("*Player not found! They may not have an Epic Account set up*");
                 return;
             }
             EmbedBuilder embed = new EmbedBuilder()

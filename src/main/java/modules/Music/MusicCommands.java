@@ -182,7 +182,7 @@ public class MusicCommands implements CommandExecutor {
         try {
             music.getAudioPlayer(event.getGuild()).setVolume(Integer.parseInt(event.getArgs()[0]));
         } catch (NumberFormatException e) {
-            event.reply("Invalid Volume Percentage, Ex: 100");
+            event.reply("*Invalid Volume Percentage, Ex: 100*");
             return;
         }
         GuildOptions options = bot.getGuildOptions(event.getGuild());
@@ -221,7 +221,7 @@ public class MusicCommands implements CommandExecutor {
     public void playlistCommand(CommandEvent event) {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
         if (event.getArgs().length < 1) {
-            event.reply("Enter a second argument: [create, list, play, show, add, remove, delete]");
+            event.reply("*Enter a second argument: [create, list, play, show, add, remove, delete]*");
             return;
         }
         GuildOptions options = bot.getGuildOptions(event.getGuild());
@@ -229,7 +229,7 @@ public class MusicCommands implements CommandExecutor {
             if (event.getArgs().length > 1) {
                 String name = event.getArgsAsString(1);
                 if (options.getPlaylistByName(name) != null) {
-                    event.reply("A playlist with that name already exists!");
+                    event.reply("*A playlist with that name already exists!*");
                     return;
                 }
                 Playlist playlist = new Playlist();
@@ -266,13 +266,14 @@ public class MusicCommands implements CommandExecutor {
                 embedBuilder.withTitle(playlist.NAME + " (" + getReadableDuration(Duration.ofMillis(totalDuration)) + ")");
                 event.reply(embedBuilder.build());
             } else {
-                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+                event.reply(
+                        "*You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists*");
             }
         } else if (event.getArgs()[0].equalsIgnoreCase("add")) {
             if (event.getArgs().length > 1) {
                 String args = event.getArgsAsString(1);
                 if (!args.contains(":")) {
-                    event.reply("Incorrect usage of the command, 'playlist add [playlist]:[song name]'");
+                    event.reply("*Incorrect usage of the command, 'playlist add [playlist]:[song name]'*");
                     return;
                 }
                 String name = args.split(":")[0];
@@ -280,7 +281,7 @@ public class MusicCommands implements CommandExecutor {
 
                 Playlist playlist = options.getPlaylistByName(name);
                 if (playlist == null) {
-                    event.reply("No playlist with that name exists");
+                    event.reply("*No playlist with that name exists*");
                     return;
                 }
 
@@ -288,7 +289,7 @@ public class MusicCommands implements CommandExecutor {
                 try {
                     video = music.getYoutubeWrapper().searchForVideo(query);
                 } catch (IOException e) {
-                    event.reply("An internal error occured while trying to search YouTube with the given query. Contact an administrator");
+                    event.reply("*An internal error occured while trying to search YouTube with the given query*");
                     return;
                 }
 
@@ -298,13 +299,14 @@ public class MusicCommands implements CommandExecutor {
                 event.reply("Added **" + video.getValue() + "** to the playlist **" + name + "**");
 
             } else {
-                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+                event.reply(
+                        "*You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists*");
             }
         } else if (event.getArgs()[0].equalsIgnoreCase("remove")) {
             if (event.getArgs().length > 1) {
                 String args = event.getArgsAsString(1);
                 if (!(args.length() > 2)) {
-                    event.reply("Incorrect usage of the command, 'playlist remove [playlist] [song index]'");
+                    event.reply("*Incorrect usage of the command, 'playlist remove [playlist] [song index]'*");
                     return;
                 }
                 String playlistName = event.getArgs()[1];
@@ -329,7 +331,8 @@ public class MusicCommands implements CommandExecutor {
                 bot.updateGuildOptions(options);
                 event.reply("Removed **" + song.TITLE + "** from the playlist **" + playlist.NAME + "**");
             } else {
-                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+                event.reply(
+                        "*You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists*");
             }
         } else if (event.getArgs()[0].equalsIgnoreCase("delete")) {
             if (event.getArgs().length > 1) {
@@ -346,24 +349,26 @@ public class MusicCommands implements CommandExecutor {
                 bot.updateGuildOptions(options);
                 event.reply("*You have successfully deleted* **" + playlist.NAME + "**");
             } else {
-                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+                event.reply(
+                        "*You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists*");
             }
         } else if (event.getArgs()[0].equalsIgnoreCase("play")) {
             if (event.getArgs().length > 1) {
                 String name = event.getArgsAsString(1);
                 Playlist playlist = options.getPlaylistByName(name);
                 if (playlist == null) {
-                    event.reply("No playlist with that name exists");
+                    event.reply("*No playlist with that name exists*");
                     return;
                 }
                 joinVoiceChannel(event.getGuild(), event.getAuthor());
                 music.getAudioPlayer(event.getGuild()).queuePlaylist(playlist);
 
             } else {
-                event.reply("You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists");
+                event.reply(
+                        "*You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists*");
             }
         } else {
-            event.reply("Enter a second argument: [create, list, play, show, add, remove, delete]");
+            event.reply("*Enter a second argument: [create, list, play, show, add, remove, delete]*");
         }
     }
 

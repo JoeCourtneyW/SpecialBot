@@ -56,7 +56,7 @@ public class CommandEvent {
     }
 
     public String getUsageMessage() {
-        return "Usage: " + command.usage();
+        return "*Usage: " + command.usage() + "*";
     }
 
     public void reply(String reply) {
