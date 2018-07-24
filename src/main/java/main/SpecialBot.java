@@ -145,23 +145,32 @@ public class SpecialBot {
 
     private void setupGuildOptions() {
         GUILD_OPTIONS_DIR = Main.DIR + File.separator + "guild_options";
-        File existanceCheck = new File(GUILD_OPTIONS_DIR);
-        if (!existanceCheck.exists()) {
-            existanceCheck.mkdir();
+        File guildOptionsDirFile = new File(GUILD_OPTIONS_DIR);
+        if (!guildOptionsDirFile.exists()) {
+            guildOptionsDirFile.mkdir();
         }
         for (IGuild guild : client.getGuilds()) {
-            existanceCheck = new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json");
-            if (!existanceCheck.exists()) {
-                try {
-                    existanceCheck.createNewFile();
-                    GuildOptions newGuild = new GuildOptions();
-                    newGuild.GUILD_ID = guild.getStringID();
-                    JsonUtil.updateJsonFile(existanceCheck, newGuild);
-                } catch (IOException e) {
-                    LoggerUtil.CRITICAL("Failed to create new guild file while setting up guild options");
-                }
+            if (!guildOptionsExist(guild)) {
+                createNewGuildOptions(guild);
             }
         }
+    }
+
+    public boolean guildOptionsExist(IGuild guild) {
+        return new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json").exists();
+    }
+
+    public void createNewGuildOptions(IGuild guild) {
+        try {
+            File optionsFile = new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json");
+            optionsFile.createNewFile();
+            GuildOptions newGuild = new GuildOptions();
+            newGuild.GUILD_ID = guild.getStringID();
+            JsonUtil.updateJsonFile(optionsFile, newGuild);
+        } catch (IOException e) {
+            LoggerUtil.CRITICAL("Failed to create new guild file while setting up guild options");
+        }
+
     }
 
     public void updateGuildOptions(GuildOptions guildOptions) {

@@ -22,6 +22,9 @@ public class CommandNSFW implements CommandExecutor {
 
     @Command(label = "nsfw")
     public void onNSFW(CommandEvent event) {
+        if (!event.getChannel().isNSFW()) {
+            event.reply("*This command can only be executed in an NSFW channel*");
+        }
         ArrayList<Submission> images = new ArrayList<>();
         String search;
         TimePeriod period = TimePeriod.DAY;
@@ -62,6 +65,7 @@ public class CommandNSFW implements CommandExecutor {
                     .sorting(SubredditSort.TOP)
                     .timePeriod(period)
                     .build();
+
             //If the post is not a self post, cache it
             aggregator.next().stream()
                     .filter(post -> !post.isSelfPost())
@@ -70,6 +74,7 @@ public class CommandNSFW implements CommandExecutor {
                             || post.getDomain().contains("i.redditmedia.com")
                             || post.getDomain().contains("gyfcat.com"))
                     .forEach(images::add);
+
             cache.put(search + "-" + period.name(), images);
             listing = images;
         } else {

@@ -28,7 +28,17 @@ public class CommandsHandler {
 
     @EventSubscriber
     public void handleCommands(MessageReceivedEvent event) {
-        String prefix = bot.getGuildOptions(event.getGuild()).PREFIX;
+        String prefix = ".";
+        if (!bot.guildOptionsExist(
+                event.getGuild())) { //This guild has not yet been set up, don't let them run any command except .setup
+            if (!event.getMessage().getContent().startsWith(".setup")) { //Make sure they run .setup
+                bot.sendChannelMessage("***You must first run .setup to be able to use commands on this server***",
+                                       event.getChannel());
+                return;
+            } //If they run .setup, let the prefix stay as '.' and the command should run as normally expected
+        } else {
+            prefix = bot.getGuildOptions(event.getGuild()).PREFIX;
+        }
         IMessage message = event.getMessage();
 
         if (!message.getContent().startsWith(prefix))

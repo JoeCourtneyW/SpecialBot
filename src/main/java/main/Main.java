@@ -1,6 +1,6 @@
 package main;
 
-import main.GuildOptions.CommandOptions;
+import main.GuildOptions.GuildOptionsCommands;
 import modules.AutoRole.AutoRole;
 import modules.Miscellaneous.Miscellaneous;
 import modules.Music.Music;
@@ -43,7 +43,7 @@ public class Main {
         bot.getClient().getDispatcher().registerListener(
                 new Main()); //Waits for ready event to initialize modules and such
         bot.registerCommands(new CommandUpdate(),
-                             new CommandOptions()); //Leave the command update while the bot is still developing
+                             new GuildOptionsCommands()); //Leave the command update while the bot is still developing
     }
 
     private static SpecialBot login() {

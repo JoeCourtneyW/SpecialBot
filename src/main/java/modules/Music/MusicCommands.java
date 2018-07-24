@@ -362,7 +362,6 @@ public class MusicCommands implements CommandExecutor {
                 }
                 joinVoiceChannel(event.getGuild(), event.getAuthor());
                 music.getAudioPlayer(event.getGuild()).queuePlaylist(playlist);
-
             } else {
                 event.reply(
                         "*You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists*");
