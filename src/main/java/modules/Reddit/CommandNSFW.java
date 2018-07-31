@@ -4,33 +4,27 @@ import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
 import net.dean.jraw.models.Submission;
-import net.dean.jraw.models.SubredditSort;
 import net.dean.jraw.models.TimePeriod;
-import net.dean.jraw.pagination.DefaultPaginator;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 public class CommandNSFW implements CommandExecutor {
 
 
     //Stored with key: 'subredditname-timeperiod EX: nsfw-ALL
     //            value: List of 100 image posts in given subreddit sorted by TOP in the given time period
-    private static HashMap<String, ArrayList<Submission>> cache = new HashMap<>();
+    private static HashMap<String, RedditCache> redditCaches = new HashMap<>();
     private static final String defaultSubreddit = "nsfw";
 
-    @Command(label = "nsfw")
+    @Command(label = "nsfw", description = "Pulls random images from nsfw subreddits", alias = "reddit")
     public void onNSFW(CommandEvent event) {
         if (!event.getChannel().isNSFW()) {
             event.reply("*This command can only be executed in an NSFW channel*");
         }
-        ArrayList<Submission> images = new ArrayList<>();
         String search;
         TimePeriod period = TimePeriod.DAY;
-        int limit = 100;
 
-        if (event.getArgs().length == 2) {
+        if (event.getArgs().length == 2) { //2 Arguments: Subreddit, and time period
             search = event.getArgs()[0].toLowerCase();
             try {
                 period = TimePeriod.valueOf(event.getArgs()[1].toUpperCase());
@@ -38,49 +32,37 @@ public class CommandNSFW implements CommandExecutor {
                 event.reply("*Invalid time period, options: <ALL, YEAR, MONTH, WEEK, DAY>*");
                 return;
             }
-        } else if (event.getArgs().length == 1) {
+        } else if (event.getArgs().length == 1) { //1 Argument: Just a subreddit
             search = event.getArgs()[0].toLowerCase();
-        } else if (event.getArgs().length == 0) {
+        } else if (event.getArgs().length == 0) { //0 Argument: Return default subreddit
             search = defaultSubreddit;
-        } else {
+        } else { //Show help message if more than 2
             event.reply("*Incorrect usage: .nsfw [subreddit name] <ALL, YEAR, MONTH, WEEK, DAY>*");
             return;
         }
 
-        try {
-            Reddit.reddit.subreddit(search).about();
-        } catch (NullPointerException e) {
-            event.reply("*That subreddit does not exist!*");
-            return;
-        }
+        String cacheKey = search + "-" + period.name(); //Used to lookup in cache
 
+        RedditCache subredditCache;
 
-        ArrayList<Submission> listing;
-        if (!cache.containsKey(search + "-" + period.name())) {
-            DefaultPaginator<Submission> aggregator;
-            DefaultPaginator.Builder<Submission, SubredditSort> builder;
-            builder = Reddit.reddit.subreddit(search).posts();
-            aggregator = builder
-                    .limit(limit)
-                    .sorting(SubredditSort.TOP)
-                    .timePeriod(period)
-                    .build();
+        if (!redditCaches.containsKey(cacheKey)) {
 
-            //If the post is not a self post, cache it
-            aggregator.next().stream()
-                    .filter(post -> !post.isSelfPost())
-                    .filter(post -> post.getDomain().contains("imgur.com")
-                            || post.getDomain().contains("i.redd.it")
-                            || post.getDomain().contains("i.redditmedia.com")
-                            || post.getDomain().contains("gyfcat.com"))
-                    .forEach(images::add);
+            try { //Make sure the subreddit exists if we don't already have it cached
+                Reddit.reddit.subreddit(search).about();
+            } catch (NullPointerException e) {
+                event.reply("*That subreddit does not exist!*");
+                return;
+            }
 
-            cache.put(search + "-" + period.name(), images);
-            listing = images;
+            subredditCache = new RedditCache(search, period);
+            redditCaches.put(cacheKey, subredditCache);
         } else {
-            listing = cache.get(search + "-" + period.name());
+            subredditCache = redditCaches.get(cacheKey);
         }
-        Submission post = listing.get(new Random().nextInt(listing.size()));
-        event.reply("[r/" + post.getSubreddit() + "] " + "*" + post.getTitle() + "*" + "\n" + post.getUrl());
+
+
+        Submission randomPost = subredditCache.getRandomSubmission(); //Grabs a random post and deletes it from the list
+
+        event.reply("[r/" + randomPost.getSubreddit() + "] " + "*" + randomPost.getTitle() + "*" + "\n" + randomPost.getUrl());
     }
 }
