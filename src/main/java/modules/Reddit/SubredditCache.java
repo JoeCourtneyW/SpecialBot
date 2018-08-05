@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class RedditCache {
+public class SubredditCache {
 
     private static final int SEARCH_LIMIT = 100;
     private static final SubredditSort SEARCH_SORT = SubredditSort.TOP;
@@ -23,7 +23,7 @@ public class RedditCache {
 
     private Instant expiration;
 
-    public RedditCache(String subredditName, TimePeriod timePeriod) {
+    public SubredditCache(String subredditName, TimePeriod timePeriod) {
         this.subredditName = subredditName;
         this.timePeriod = timePeriod;
 

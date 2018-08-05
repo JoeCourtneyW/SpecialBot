@@ -13,7 +13,7 @@ public class CommandNSFW implements CommandExecutor {
 
     //Stored with key: 'subredditname-timeperiod EX: nsfw-ALL
     //            value: List of 100 image posts in given subreddit sorted by TOP in the given time period
-    private static HashMap<String, RedditCache> redditCaches = new HashMap<>();
+    private static HashMap<String, SubredditCache> redditCaches = new HashMap<>();
     private static final String defaultSubreddit = "nsfw";
 
     @Command(label = "nsfw", description = "Pulls random images from nsfw subreddits", alias = "reddit")
@@ -43,7 +43,7 @@ public class CommandNSFW implements CommandExecutor {
 
         String cacheKey = search + "-" + period.name(); //Used to lookup in cache
 
-        RedditCache subredditCache;
+        SubredditCache subredditCache;
 
         if (!redditCaches.containsKey(cacheKey)) {
 
@@ -54,7 +54,7 @@ public class CommandNSFW implements CommandExecutor {
                 return;
             }
 
-            subredditCache = new RedditCache(search, period);
+            subredditCache = new SubredditCache(search, period);
             redditCaches.put(cacheKey, subredditCache);
         } else {
             subredditCache = redditCaches.get(cacheKey);
