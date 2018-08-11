@@ -179,7 +179,13 @@ public class SpecialBot {
     }
 
     public GuildOptions getGuildOptions(IGuild guild) {
-        return (GuildOptions) JsonUtil.getJavaObject(
-                new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
+        try {
+            return (GuildOptions) JsonUtil.getJavaObject(
+                    new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
+        } catch(Exception e) {
+            //Update new guild options schema TODO
+            return (GuildOptions) JsonUtil.getJavaObject(
+                    new File(GUILD_OPTIONS_DIR + File.separator + guild.getStringID() + ".json"), GuildOptions.class);
+        }
     }
 }

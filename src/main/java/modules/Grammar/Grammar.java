@@ -18,6 +18,7 @@ public class Grammar implements SpecialModule {
 
     @Override
     public boolean onLoad() {
+        //TODO: Honestly just get rid of this lmao, the most annoying thing ever
         bot.registerHandlers(this);
         langTool = new JLanguageTool(new AmericanEnglish());
         return true;
@@ -27,14 +28,16 @@ public class Grammar implements SpecialModule {
     public void onMessage(MessageReceivedEvent event) throws IOException {
         GuildOptions options = bot.getGuildOptions(event.getGuild());
         if (!event.getMessage().getContent().startsWith(options.PREFIX)) {
-
             List<RuleMatch> matches = langTool.check(event.getMessage().getContent());
             StringJoiner correctionMessage = new StringJoiner(" ");
             for (RuleMatch match : matches) {
-                correctionMessage.add(match.getMessage());
+                if (match.getMessage().endsWith(".") || match.getMessage().endsWith("?"))
+                    correctionMessage.add(match.getMessage());
+                else
+                    correctionMessage.add(match.getMessage() + ".");
             }
 
-            if(matches.size() > 0)
+            if (matches.size() > 0)
                 bot.sendChannelMessage(event.getAuthor().mention() + ", " + correctionMessage.toString(), event.getChannel());
         }
     }

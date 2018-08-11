@@ -2,7 +2,6 @@ package main;
 
 import main.GuildOptions.GuildOptionsCommands;
 import modules.AutoRole.AutoRole;
-import modules.Grammar.Grammar;
 import modules.Miscellaneous.Miscellaneous;
 import modules.Music.Music;
 import modules.Reddit.Reddit;
@@ -72,7 +71,7 @@ public class Main {
         bot.loadModule(new StatTracking());
         bot.loadModule(new Music());
         bot.loadModule(new Miscellaneous());
-        bot.loadModule(new Grammar());
+        //bot.loadModule(new Grammar());
     }
 
     /**

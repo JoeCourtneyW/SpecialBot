@@ -8,6 +8,7 @@ import main.com.github.courtneyjoew.R6Player;
 import main.com.github.courtneyjoew.declarations.Platform;
 import sx.blah.discord.util.EmbedBuilder;
 
+import java.awt.*;
 import java.text.DecimalFormat;
 
 public class CommandRainbow implements CommandExecutor {
@@ -30,16 +31,21 @@ public class CommandRainbow implements CommandExecutor {
 
             embed.withAuthorName(player.getName());
             embed.withAuthorIcon(player.getAvatarUrl());
-            embed.withThumbnail(player.getRank().getIconUrl());
+
+            embed.withColor(Color.GRAY);
             embed.appendDesc("Ranked stats in NA UPlay Servers");
 
+            embed.withThumbnail(player.getRank().getIconUrl());
             embed.appendField("**Rank**", player.getRank().getDisplayName(), true);
+
             embed.appendField("**MMR**", "**" + twoPlaces.format(player.getMmr()) + "** (" + twoPlaces.format(player.getMaxMmr()) + ")", true);
             embed.appendField("**Statistics**", "**Wins: **" + player.getRankedWins() + " **Losses: **" + player.getRankedLosses() + "\n"
                     + "**Win Rate: **" + twoPlaces.format(player.getRankedWins() / (player.getRankedLosses() + player.getRankedWins()*1.0) * 100) + "%" + "\n"
                     + "**Abandons: **" + player.getAbandons(), true);
             embed.appendField("**Skill**", "**Mean: **" + twoPlaces.format(player.getSkill()) + "\n"
-                    + " **StDev: **" + twoPlaces.format(player.getSkillStandardDeviation()), true);
+                    + " **StDev: **" + twoPlaces.format(player.getSkillStandardDeviation()) + "\n"
+                    + " **K/D: **" + twoPlaces.format(player.getKills() / (player.getDeaths() * 1.0)), true);
+            //TODO: Wait for ranked K/D to be available instead of global K/D, requires R6J update
 
             event.reply(embed.build());
         } else {

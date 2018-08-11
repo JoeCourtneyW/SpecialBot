@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ApiRequest {
 
-    private static HttpClient httpClient = HttpClientBuilder.create().build();
+    private static HttpClient httpClient = HttpClientBuilder.create()
+            .setConnectionTimeToLive(10000, TimeUnit.MILLISECONDS).build();
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private StringBuilder url;

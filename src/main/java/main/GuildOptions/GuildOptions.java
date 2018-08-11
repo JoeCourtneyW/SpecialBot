@@ -15,7 +15,6 @@ public class GuildOptions {
     public int BOT_VOLUME = 100;
     public String DEFAULT_ROLE = "";
     public boolean AUTO_KICK = false;
-
     public Playlist getPlaylistByName(String name) {
         return PLAYLISTS.stream()
                 .filter(playlist -> playlist.NAME.equalsIgnoreCase(name))

@@ -12,7 +12,7 @@ import utils.http.ApiRequest;
 
 public class MiscCommands implements CommandExecutor {
 
-    @Command(label = "quote")
+    @Command(label = "quote", description = "Responds with a quote")
     public void quoteCommand(CommandEvent event) throws HttpException {
         JsonNode response = new ApiRequest("http://quotesondesign.com").setEndpoint("/wp-json/posts")
                 .setParameter("filter[orderby]", "rand")
@@ -23,6 +23,20 @@ public class MiscCommands implements CommandExecutor {
         if (status == 200) //Trimming five chars from quote length for "\n" & "<p>" from html content
             event.reply("*\"" + quote.substring(3, quote.length() - 6).trim() + "\"* - " + response.get("content").get(
                     0).get("title").asText());
+        else
+            throw new HttpException("Quote website error: Status code:" + status);
+
+    }
+    @Command(label = "dad", description = "Responds with a dad joke", alias = "joke")
+    public void dadCommand(CommandEvent event) throws HttpException {
+        //TODO: Times out the entire bot after two uses? Idk what is up with that
+        JsonNode response = new ApiRequest("https://icanhazdadjoke.com/")
+                .addHeader("Accept", "application/json")
+                .addHeader("User-Agent", "SpecialBot (https://github.com/JoeCourtneyW/SpecialBot)")
+                .get();
+        int status = response.get("status").asInt();
+        if (status == 200)
+            event.reply(response.get("content").get("joke").asText());
         else
             throw new HttpException("Quote website error: Status code:" + status);
 
