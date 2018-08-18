@@ -39,13 +39,12 @@ public class CommandRainbow implements CommandExecutor {
             embed.appendField("**Rank**", player.getRank().getDisplayName(), true);
 
             embed.appendField("**MMR**", "**" + twoPlaces.format(player.getMmr()) + "** (" + twoPlaces.format(player.getMaxMmr()) + ")", true);
-            embed.appendField("**Statistics**", "**Wins: **" + player.getRankedWins() + " **Losses: **" + player.getRankedLosses() + "\n"
-                    + "**Win Rate: **" + twoPlaces.format(player.getRankedWins() / (player.getRankedLosses() + player.getRankedWins()*1.0) * 100) + "%" + "\n"
+            embed.appendField("**Statistics**", "**Wins: **" + player.getSeasonRankedWins() + " **Losses: **" + player.getSeasonRankedLosses() + "\n"
+                    + "**Win Rate: **" + twoPlaces.format(player.getSeasonRankedWins() / (player.getSeasonRankedLosses() + player.getSeasonRankedWins()*1.0) * 100) + "%" + "\n"
                     + "**Abandons: **" + player.getAbandons(), true);
             embed.appendField("**Skill**", "**Mean: **" + twoPlaces.format(player.getSkill()) + "\n"
                     + " **StDev: **" + twoPlaces.format(player.getSkillStandardDeviation()) + "\n"
-                    + " **K/D: **" + twoPlaces.format(player.getKills() / (player.getDeaths() * 1.0)), true);
-            //TODO: Wait for ranked K/D to be available instead of global K/D, requires R6J update
+                    + " **K/D: **" + twoPlaces.format(player.getRankedKills() / (player.getRankedDeaths() * 1.0)), true);
 
             event.reply(embed.build());
         } else {
