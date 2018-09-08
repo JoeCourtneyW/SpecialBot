@@ -8,11 +8,13 @@ public @interface Command {
 
     String label();
 
+    PermissionLevel permissionLevel() default PermissionLevel.DEFAULT;
+
     String usage() default ".command";
 
     String description() default "This command does not yet have a description";
 
     String alias() default "";
 
-    boolean adminOnly() default false;
+    boolean guildAdminOnly() default false;
 }

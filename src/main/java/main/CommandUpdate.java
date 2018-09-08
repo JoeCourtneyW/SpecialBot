@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class CommandUpdate implements CommandExecutor {
 
-    @Command(label = "update", adminOnly = true)
+    @Command(label = "update", guildAdminOnly = true)
     public void onUpdate(CommandEvent event) {
         if (event.getAuthor().getStringID().equalsIgnoreCase("107131529318117376")) { //SlyBro3#8695
             bot.getClient().logout();
@@ -21,7 +21,7 @@ public class CommandUpdate implements CommandExecutor {
         }
     }
 
-    @Command(label = "logout", adminOnly = true)
+    @Command(label = "logout", guildAdminOnly = true)
     public void onLogout(CommandEvent event) {
         if (event.getAuthor().getStringID().equalsIgnoreCase("107131529318117376")) { //SlyBro3#8695
             bot.getClient().logout();

@@ -3,6 +3,7 @@ package modules.Reddit;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
+import main.Commands.PermissionLevel;
 import net.dean.jraw.models.Submission;
 import net.dean.jraw.models.TimePeriod;
 
@@ -16,7 +17,10 @@ public class CommandNSFW implements CommandExecutor {
     private static HashMap<String, SubredditCache> redditCaches = new HashMap<>();
     private static final String defaultSubreddit = "nsfw";
 
-    @Command(label = "nsfw", description = "Pulls random images from nsfw subreddits", alias = "reddit")
+    @Command(label = "nsfw",
+            description = "Pulls random images from nsfw subreddits",
+            alias = "reddit",
+            permissionLevel = PermissionLevel.PRIVILIGED_MEMBER)
     public void onNSFW(CommandEvent event) {
         if (!event.getChannel().isNSFW()) {
             event.reply("*This command can only be executed in an NSFW channel*");

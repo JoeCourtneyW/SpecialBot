@@ -3,8 +3,8 @@ package modules.Music;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
-import javafx.util.Pair;
 import main.Main;
+import utils.Pair;
 
 import java.io.IOException;
 import java.time.Duration;

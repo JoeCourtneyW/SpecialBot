@@ -1,6 +1,5 @@
 package modules.Music;
 
-import javafx.util.Pair;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
@@ -13,6 +12,7 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.EmbedBuilder;
 import utils.LoggerUtil;
+import utils.Pair;
 import utils.http.UrlUtil;
 
 import java.io.IOException;

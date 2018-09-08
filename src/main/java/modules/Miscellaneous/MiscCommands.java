@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
+import main.Commands.PermissionLevel;
 import main.Main;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.HttpException;
@@ -42,7 +43,7 @@ public class MiscCommands implements CommandExecutor {
 
     }
 
-    @Command(label = "shorten", description = "Shorten a given url using BITLY")
+    @Command(label = "shorten", description = "Shorten a given url using BITLY", permissionLevel = PermissionLevel.MODERATOR)
     public void shortenCommand(CommandEvent event) throws HttpException {
         if (event.getArgs().length == 0) {
             event.reply("*You must enter a link to shorten*");
@@ -61,7 +62,7 @@ public class MiscCommands implements CommandExecutor {
 
     }
 
-    @Command(label = "cleanse")
+    @Command(label = "cleanse", permissionLevel = PermissionLevel.MODERATOR)
     public void cleanseCommand(CommandEvent event) {
         int count = 1;
         if (event.getArgs().length == 1) {
