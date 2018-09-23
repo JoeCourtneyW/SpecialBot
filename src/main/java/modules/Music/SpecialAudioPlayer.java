@@ -83,23 +83,32 @@ public class SpecialAudioPlayer {
                 Music.instance.getBot().sendChannelMessage("**Downloading song...**", lastChannel);
                 Music.instance.getDownloader().download(song);
             }
-            Music.instance.getMusicHandler().onQueue(guild, song);
-            songQueue.offer(song);
-            if (playing == null) {
-                try {
-                    next();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
+        try {
+            while(!Downloader.isDownloaded(song)) {
+                Thread.sleep(500);
             }
+            Thread.sleep(1000);
+        } catch (InterruptedException e){
+             e.printStackTrace();
+        }
+        Music.instance.getMusicHandler().onQueue(guild, song);
+        songQueue.offer(song);
+        if (playing == null) {
+            try {
+                next();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         });
     }
 
     public void queuePlaylist(Playlist playlist) {
         Music.instance.getDownloader().getDownloadThreads().submit(() -> {
-            if(!playlist.SONGS.stream().allMatch(Downloader::isDownloaded)){ //TODO: Add counter in message that updates the amount of songs downloaded out of total
+            if (!playlist.SONGS.stream().allMatch(Downloader::isDownloaded)) { //TODO: Add counter in message that updates the amount of songs downloaded out of total
                 Music.instance.getBot().sendChannelMessage("**Downloading songs, This may take a second...**",
-                                                           lastChannel);
+                        lastChannel);
             }
             for (Song song : playlist) {
                 if (!Downloader.isDownloaded(song)) {

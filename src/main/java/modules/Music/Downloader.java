@@ -86,7 +86,7 @@ public class Downloader {
             String url = "http://youtu.be/" + song.ID;
             try {
                 Process p = Runtime.getRuntime().exec("sudo youtube-dl --id --extract-audio --audio-format mp3 " + url,
-                                                      null, music.getMusicDirectory());
+                        null, music.getMusicDirectory());
                 LoggerUtil.DEBUG("Downloading youtube mp3 from " + url);
                 p.waitFor();
                 LoggerUtil.DEBUG("File downloaded");
@@ -106,11 +106,17 @@ public class Downloader {
             request.setOption("ignore-errors");
             request.setOption("retries", 2);
 
-            try {
-                YoutubeDL.execute(request);
-            } catch (YoutubeDLException e) {
-                e.printStackTrace();
-            }
+
+            downloadThreads.submit(() -> {
+                        try {
+                            YoutubeDL.execute(request);
+                        } catch (YoutubeDLException e) {
+                            e.printStackTrace();
+                        }
+                        LoggerUtil.DEBUG("Finished download.");
+                    }
+            );
+
         }
     }
 }

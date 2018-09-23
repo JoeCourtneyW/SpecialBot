@@ -76,10 +76,10 @@ public class MusicCommands implements CommandExecutor {
             String id = YoutubeWrapper.getIdFromUrl(event.getArgs()[0]);
             String title = music.getYoutubeWrapper().getVideoTitle(id);
             long duration = music.getYoutubeWrapper().getVideoDuration(id);
-            if (duration > 1000 * 60 * 10) {
+            /*if (duration > 1000 * 60 * 10) {
                 event.reply("*That video is too long to play! Videos must be under 10 minutes*");
                 return;
-            }
+            }*/
             music.getAudioPlayer(event.getGuild()).queueSong(new Song(id, title, duration));
         } else { //Search the youtube library and try to find the song provided
             String query = event.getArgsAsString(0);
