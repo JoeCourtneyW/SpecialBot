@@ -91,10 +91,10 @@ public class MusicCommands implements CommandExecutor {
                 return;
             }
             long duration = music.getYoutubeWrapper().getVideoDuration(video.getKey());
-            if (duration > 1000 * 60 * 10) {
+            /*if (duration > 1000 * 60 * 10) {
                 event.reply("*That video is too long to play! Videos must be under 10 minutes*");
                 return;
-            }
+            }*/
             music.getAudioPlayer(event.getGuild()).queueSong(new Song(video.getKey(), video.getValue(), duration));
         }
 
