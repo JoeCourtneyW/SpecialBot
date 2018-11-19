@@ -103,7 +103,30 @@ public class SpecialAudioPlayer {
         }
         });
     }
+    public void queueSongSilent(Song song) {
+            if (!Downloader.isDownloaded(song)) {
+                Music.instance.getDownloader().download(song);
+            }
 
+            try {
+                while(!Downloader.isDownloaded(song)) {
+                    Thread.sleep(500);
+                }
+                Thread.sleep(1000);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+
+            songQueue.offer(song);
+
+            if (playing == null) {
+                try {
+                    next();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+    }
     public void queuePlaylist(Playlist playlist) {
         Music.instance.getDownloader().getDownloadThreads().submit(() -> {
             if (!playlist.SONGS.stream().allMatch(Downloader::isDownloaded)) { //TODO: Add counter in message that updates the amount of songs downloaded out of total
@@ -111,10 +134,7 @@ public class SpecialAudioPlayer {
                         lastChannel);
             }
             for (Song song : playlist) {
-                if (!Downloader.isDownloaded(song)) {
-                    Music.instance.getDownloader().download(song);
-                }
-                songQueue.offer(song);
+                queueSongSilent(song);
             }
 
             Music.instance.getMusicHandler().onQueue(guild, playlist);

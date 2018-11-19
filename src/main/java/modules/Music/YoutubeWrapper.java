@@ -2,12 +2,13 @@ package modules.Music;
 
 
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.SearchResult;
+import com.google.api.services.youtube.model.*;
 import main.Main;
 import utils.Pair;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 public class YoutubeWrapper {
@@ -44,6 +45,34 @@ public class YoutubeWrapper {
         return new Pair<>(id, title);
     }
 
+    public List<PlaylistItem> getSongsFromPlaylist(String id) throws IOException {
+        // Define a list to store items in the list of uploaded videos.
+        List<PlaylistItem> playlistItemList = new ArrayList<>();
+
+        YouTube.PlaylistItems.List playlistItemRequest =
+                Music.instance.getYoutube().playlistItems().list("id,contentDetails,snippet");
+        playlistItemRequest.setKey(API_KEY);
+        playlistItemRequest.setPlaylistId(id);
+        playlistItemRequest.setFields(
+                "items(contentDetails/videoId,snippet/title),nextPageToken,pageInfo");
+
+        String nextToken = "";
+
+        // Call the API one or more times to retrieve all items in the
+        // list. As long as the API response returns a nextPageToken,
+        // there are still more items to retrieve.
+        do {
+            playlistItemRequest.setPageToken(nextToken);
+            PlaylistItemListResponse playlistItemResult = playlistItemRequest.execute();
+
+            playlistItemList.addAll(playlistItemResult.getItems());
+
+            nextToken = playlistItemResult.getNextPageToken();
+        } while (nextToken != null);
+
+        return playlistItemList;
+    }
+
     public String getVideoTitle(String id) {
         try {
             YouTube.Videos.List list = music.getYoutube().videos().list("snippet");
@@ -68,7 +97,7 @@ public class YoutubeWrapper {
         }
     }
 
-    public static String getIdFromUrl(String url) {
+    public static String getVideoIdFromUrl(String url) {
         //TODO: Craft regex to determine if the url given is a youtube url
         String id;
         if (url.contains("youtu.be")) {
@@ -79,5 +108,9 @@ public class YoutubeWrapper {
                 id = id.split("&")[0];
         }
         return id;
+    }
+
+    public static String getPlaylistIdFromUrl(String url) {
+        return url.split("&list=")[1]; //TODO, safer way to do this omega
     }
 }

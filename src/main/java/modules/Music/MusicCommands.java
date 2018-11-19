@@ -1,5 +1,6 @@
 package modules.Music;
 
+import com.google.api.services.youtube.model.PlaylistItem;
 import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
@@ -73,7 +74,7 @@ public class MusicCommands implements CommandExecutor {
         joinVoiceChannel(event.getGuild(), event.getAuthor());
 
         if (UrlUtil.isUrl(event.getArgs()[0]) && UrlUtil.isYoutubeURL(event.getArgs()[0])) { //The user provided a direct youtube link. We can grab the id from that: no need to search
-            String id = YoutubeWrapper.getIdFromUrl(event.getArgs()[0]);
+            String id = YoutubeWrapper.getVideoIdFromUrl(event.getArgs()[0]);
             String title = music.getYoutubeWrapper().getVideoTitle(id);
             long duration = music.getYoutubeWrapper().getVideoDuration(id);
             /*if (duration > 1000 * 60 * 10) {
@@ -221,7 +222,7 @@ public class MusicCommands implements CommandExecutor {
     public void playlistCommand(CommandEvent event) {
         music.getAudioPlayer(event.getGuild()).setLastChannel(event.getChannel());
         if (event.getArgs().length < 1) {
-            event.reply("*Enter a second argument: [create, list, play, show, add, remove, delete]*");
+            event.reply("*Enter a second argument: [create, import, list, play, show, add, remove, delete]*");
             return;
         }
         GuildOptions options = bot.getGuildOptions(event.getGuild());
@@ -366,8 +367,51 @@ public class MusicCommands implements CommandExecutor {
                 event.reply(
                         "*You must specify a playlist, type \"" + options.PREFIX + "playlist list\" for a list of playlists*");
             }
+        } else if (event.getArgs()[0].equalsIgnoreCase("import")) {
+            if (event.getArgs().length > 2) {
+                String name = event.getArgsAsString(2);
+                if (options.getPlaylistByName(name) != null) {
+                    event.reply("*A playlist with that name already exists!*");
+                    return;
+                }
+
+                ArrayList<Song> songList = new ArrayList<>();
+                String playlistId = YoutubeWrapper.getPlaylistIdFromUrl(event.getArgs()[1]);
+                List<PlaylistItem> playlistItems;
+                try {
+                    playlistItems = Music.instance.getYoutubeWrapper().getSongsFromPlaylist(playlistId);
+                } catch (IOException e) {
+                    event.reply("*An internal error occured while trying to search YouTube with the given query*");
+                    e.printStackTrace();
+                    return;
+                }
+
+                Song song;
+                for (PlaylistItem playlistItem : playlistItems) {
+                    String videoId = playlistItem.getContentDetails().getVideoId();
+                    String title = playlistItem.getSnippet().getTitle();
+
+                    long duration = Music.instance.getYoutubeWrapper().getVideoDuration(videoId);
+
+                    song = new Song(videoId, title, duration);
+
+                    songList.add(song);
+                }
+
+                Playlist playlist = new Playlist();
+                playlist.NAME = name;
+                playlist.SONGS = songList;
+
+                options.PLAYLISTS.add(playlist);
+
+                bot.updateGuildOptions(options);
+                event.reply("*You have imported the given youtube playlist as* **" + playlist.NAME + "**");
+            } else {
+                event.reply(
+                        "*Incorrect usage of the command, 'playlist import [playlist link] [playlist name]'*");
+            }
         } else {
-            event.reply("*Enter a second argument: [create, list, play, show, add, remove, delete]*");
+            event.reply("*Enter a second argument: [create, import, list, play, show, add, remove, delete]*");
         }
     }
 
