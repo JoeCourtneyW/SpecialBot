@@ -4,11 +4,11 @@ import main.Commands.Command;
 import main.Commands.CommandEvent;
 import main.Commands.CommandExecutor;
 import main.Commands.PermissionLevel;
-import main.com.github.courtneyjoew.R6J;
-import main.com.github.courtneyjoew.R6Player;
-import main.com.github.courtneyjoew.declarations.Platform;
-import main.com.github.courtneyjoew.declarations.Region;
-import main.com.github.courtneyjoew.stats.OperatorStats;
+import main.com.github.joecourtneyw.R6J;
+import main.com.github.joecourtneyw.R6Player;
+import main.com.github.joecourtneyw.declarations.Platform;
+import main.com.github.joecourtneyw.declarations.Region;
+import main.com.github.joecourtneyw.stats.OperatorStats;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.awt.*;
@@ -32,12 +32,17 @@ public class CommandRainbow implements CommandExecutor {
         if (r6.playerExists(event.getArgs()[0], Platform.UPLAY)) {
 
             R6Player player;
+            Region region = Region.NA;
+            if (event.getArgs().length == 2) {
+                if (event.getArgs()[1].equalsIgnoreCase("EU"))
+                    region = Region.EU;
+                else if (event.getArgs()[1].equalsIgnoreCase("AS") || event.getArgs()[1].equalsIgnoreCase("ASIA"))
+                    region = Region.ASIA;
+                else
+                    region = Region.NA;
+            }
 
-            if (event.getArgs().length == 2)
-                player = r6.getPlayerByName(event.getArgs()[0], Platform.UPLAY, Region.EU);
-            else
-                player = r6.getPlayerByName(event.getArgs()[0], Platform.UPLAY, Region.NA);
-
+            player = r6.getPlayerByName(event.getArgs()[0], Platform.UPLAY, region);
 
             EmbedBuilder embed = new EmbedBuilder();
 
@@ -45,14 +50,14 @@ public class CommandRainbow implements CommandExecutor {
             embed.withAuthorIcon(player.getAvatarUrl());
 
             embed.withColor(Color.GRAY);
-            embed.appendDesc("Ranked stats in NA UPlay Servers");
+            embed.appendDesc("Ranked stats in " + region.name() + " UPlay Servers");
 
             embed.withThumbnail(player.getRank().getIconUrl());
             embed.appendField("**Rank**", player.getRank().getDisplayName(), true);
 
             embed.appendField("**MMR**", "**" + twoPlaces.format(player.getMmr()) + "** (" + twoPlaces.format(player.getMaxMmr()) + ")", true);
-            embed.appendField("**Statistics**", "**Wins: **" + player.getSeasonRankedWins() + " **Losses: **" + player.getSeasonRankedLosses() + "\n"
-                    + "**Win Rate: **" + twoPlaces.format(player.getSeasonRankedWins() / (player.getSeasonRankedLosses() + player.getSeasonRankedWins() * 1.0) * 100) + "%" + "\n"
+            embed.appendField("**Statistics**", "**Wins: **" + player.getRankedWins() + " **Losses: **" + player.getRankedLosses() + "\n"
+                    + "**Win Rate: **" + twoPlaces.format(player.getRankedWins() / (player.getRankedLosses() + player.getRankedWins() * 1.0) * 100) + "%" + "\n"
                     + "**Abandons: **" + player.getAbandons(), true);
             embed.appendField("**Skill**", "**Mean: **" + twoPlaces.format(player.getSkill()) + "\n"
                     + " **StDev: **" + twoPlaces.format(player.getSkillStandardDeviation()) + "\n"

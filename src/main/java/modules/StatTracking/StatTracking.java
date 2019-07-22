@@ -2,8 +2,8 @@ package modules.StatTracking;
 
 import main.Main;
 import main.SpecialModule;
-import main.com.github.courtneyjoew.Auth;
-import main.com.github.courtneyjoew.R6J;
+import main.com.github.joecourtneyw.Auth;
+import main.com.github.joecourtneyw.R6J;
 import utils.http.RequestPool;
 
 public class StatTracking implements SpecialModule {
@@ -24,7 +24,6 @@ public class StatTracking implements SpecialModule {
         rainbowSix = new R6J(
                 new Auth(Main.CREDENTIALS.RAINBOW_SIX_EMAIL,
                         Main.CREDENTIALS.RAINBOW_SIX_PASSWORD));
-
         bot.registerCommands(new CommandFortnite());
         bot.registerCommands(new CommandRainbow());
         return true;

@@ -75,7 +75,7 @@
     <orderEntry type="library" name="Maven: edu.washington.cs.knowitall:opennlp-tokenize-models:1.5" level="project" />
     <orderEntry type="library" name="Maven: edu.washington.cs.knowitall:opennlp-postag-models:1.5" level="project" />
     <orderEntry type="library" name="Maven: edu.washington.cs.knowitall:opennlp-chunk-models:1.5" level="project" />
-    <orderEntry type="library" name="Maven: com.github.joecourtneyw:R6J:1.0.3" level="project" />
+    <orderEntry type="library" name="Maven: com.github.joecourtneyw:R6J:1.1.0" level="project" />
     <orderEntry type="library" name="Maven: com.github.sapher:youtubedl-java:1.1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.12" level="project" />
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
